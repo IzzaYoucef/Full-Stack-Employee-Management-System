@@ -30,15 +30,15 @@ const LoginLanding = () => {
           </div>
           {portalOption.map((p) => (
             <Link
-              to={p.to}
+              to={p.to} 
               key={p.to}
-              className='flex justify-between p-4 bg-[#F8FAFC] items-center'
+              className='flex justify-between p-4 bg-[#F8FAFC] items-center pointer border-1 mb-2'
             >
               <p>{p.title}</p>
               <p.icon className="w-5 h-5" />
             </Link>
           ))}
-          <p className='mt-10'>© Izza Youcef 2026 All rights reserved</p>
+          <p className='mt-10'>© Izza Youcef {new Date().getFullYear()} All rights reserved</p>
         </div>
       </div>
     </div>
