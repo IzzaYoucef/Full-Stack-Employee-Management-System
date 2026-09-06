@@ -26,8 +26,9 @@ const SideBar = () => {
   const [mobileShow, setMobileShow] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
-  const [name, setName] = useState("")
-
+  const [name, setName] = useState("") 
+  const [userName , setUserName] = useState("Bissou");
+  const role = "" || "Empoyee"
   useEffect(() => {
     setName(dummyProfileData.firstName + " " + dummyProfileData.lastName)
   }, [])
@@ -57,7 +58,19 @@ const SideBar = () => {
           )}
         </div>
       </div>
-
+        {userName && (
+          <div className='mb-3 mt-4 mb-1 p-3 rounded-lg bg-white/3 border  border-white/4' >
+            <div className='flex items-center gap-3'>
+                <div className='w-10 h-10 flex items-center justify-center border rounded border-white outline-none bg-transparent'>
+                  <span className='color-[#90A1B9] text-white font-500'>{userName.charAt(0).toUpperCase()}</span>
+                </div> 
+              <div className="flex flex-col gap-1">
+                <h1 className="font-semibold text-md text-[#E2E8F0]">{userName}</h1>
+                <p className="text-sm text-[#62748E] font-semibold">{role === "Admin" ? "Administrator" : "Employee"}</p>
+              </div>
+            </div>
+          </div>
+        )}
       <p className="uppercase text-[#62748E] text-xs mt-4 mb-2">Navigation</p>
 
       <nav className="flex flex-col gap-1">
@@ -93,7 +106,7 @@ const SideBar = () => {
       {/* Mobile hamburger trigger */}
       <button
         type="button"
-        className="md:hidden p-2"
+        className="md:hidden p-2 flex items-start"
         onClick={() => setMobileShow(true)}
         aria-label="Open menu"
       >
