@@ -5,3 +5,5 @@
 - [x] Add landing page and Admin/Employee login portals
 - [x] Add sidebar navigation
 - [x] Add dashboard with separate Admin and Employee views
+- [x] Add Employees page
+- [x] Add Attendance page 
