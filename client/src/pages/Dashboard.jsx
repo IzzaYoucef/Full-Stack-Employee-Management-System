@@ -9,7 +9,7 @@ const Dashboard = () => {
 
 
     useEffect(() => {
-        setData(dummyEmployeeDashboardData)
+        setData(dummyAdminDashboardData)
         setLoading(false) 
         console.log(data)
     }, [])
@@ -29,7 +29,7 @@ const Dashboard = () => {
                 <p className='text-[#62748E] font-normal text-sm'>DevOps - Developement </p> 
             </div>
 
-            {data.role === "ADM"
+            {data.role === "ADMIN"
                 ? <AdminDashboard data={data} />
                 : <EmployeeDahboard data={data} />
             }

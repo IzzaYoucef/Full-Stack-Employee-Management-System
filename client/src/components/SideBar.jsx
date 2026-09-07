@@ -8,13 +8,23 @@ import {
   Menu,
   Settings,
   UserIcon,
+  UsersIcon,
   XIcon
 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { dummyProfileData } from '../assets/assets'
 
-const navItems = [
+const adminNavItems = [
+  { label: "Dashboard", icon: LayoutDashboardIcon, to: "/dashboard" },
+  { label: "Employees", icon: UsersIcon, to: "/employees" },
+  { label: "Attendance", icon: CalendarCheck, to: "/attendance" },
+  { label: "Leave", icon: CalendarX, to: "/leave" },
+  { label: "PaySlips", icon: DollarSign, to: "/payslips" },
+  { label: "Settings", icon: Settings, to: "/settings" },
+]
+
+const employeeNavItems = [
   { label: "Dashboard", icon: LayoutDashboardIcon, to: "/dashboard" },
   { label: "Attendance", icon: CalendarCheck, to: "/attendance" },
   { label: "Leave", icon: CalendarX, to: "/leave" },
@@ -26,16 +36,23 @@ const SideBar = () => {
   const [mobileShow, setMobileShow] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
-  const [name, setName] = useState("") 
-  const [userName , setUserName] = useState("Bissou");
-  const role = "" || "Empoyee"
+  const [name, setName] = useState("")
+  const [userName, setUserName] = useState("")
+  const [role, setRole] = useState("Admin")
+
   useEffect(() => {
-    setName(dummyProfileData.firstName + " " + dummyProfileData.lastName)
+    setTimeout(()=>{
+      setName(dummyProfileData.firstName + " " + dummyProfileData.lastName)
+      setUserName(dummyProfileData.firstName)
+      setRole("Admin")
+    },1000)
   }, [])
 
   useEffect(() => {
     setMobileShow(false)
   }, [location])
+
+  const navItems = role === "Admin" ? adminNavItems : employeeNavItems
 
   const SideBarContent = ({ isMobile }) => (
     <>
@@ -58,19 +75,21 @@ const SideBar = () => {
           )}
         </div>
       </div>
-        {userName && (
-          <div className='mb-3 mt-4 mb-1 p-3 rounded-lg bg-white/3 border  border-white/4' >
-            <div className='flex items-center gap-3'>
-                <div className='w-10 h-10 flex items-center justify-center border rounded border-white outline-none bg-transparent'>
-                  <span className='color-[#90A1B9] text-white font-500'>{userName.charAt(0).toUpperCase()}</span>
-                </div> 
-              <div className="flex flex-col gap-1">
-                <h1 className="font-semibold text-md text-[#E2E8F0]">{userName}</h1>
-                <p className="text-sm text-[#62748E] font-semibold">{role === "Admin" ? "Administrator" : "Employee"}</p>
-              </div>
+
+      {userName && (
+        <div className='mt-4 mb-3 p-3 rounded-lg bg-white/3 border border-white/4'>
+          <div className='flex items-center gap-3'>
+            <div className='w-10 h-10 flex items-center justify-center border rounded border-white outline-none bg-transparent'>
+              <span className='text-[#90A1B9] font-medium'>{userName.charAt(0).toUpperCase()}</span>
+            </div>
+            <div className="flex flex-col gap-1">
+              <h1 className="font-semibold text-md text-[#E2E8F0]">{userName}</h1>
+              <p className="text-sm text-[#62748E] font-semibold">{role === "Admin" ? "Administrator" : "Employee"}</p>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
       <p className="uppercase text-[#62748E] text-xs mt-4 mb-2">Navigation</p>
 
       <nav className="flex flex-col gap-1">
@@ -92,8 +111,8 @@ const SideBar = () => {
 
       <button
         type="button"
-        onClick={() => {navigate("/login") }} 
-        className="mt-20 flex items-center justify-center gap-2 cursor-pointer mt-8 text-sm font-semibold text-white"
+        onClick={() => navigate("/login")}
+        className="mt-8 flex items-center justify-center gap-2 cursor-pointer text-sm font-semibold text-white"
       >
         <LogOutIcon size={18} />
         Log out
@@ -103,7 +122,6 @@ const SideBar = () => {
 
   return (
     <>
-      {/* Mobile hamburger trigger */}
       <button
         type="button"
         className="md:hidden p-2 flex items-start"
@@ -113,7 +131,6 @@ const SideBar = () => {
         <Menu size={22} />
       </button>
 
-      {/* Mobile overlay menu */}
       {mobileShow && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileShow(false)} />
@@ -123,7 +140,6 @@ const SideBar = () => {
         </div>
       )}
 
-      {/* Desktop persistent sidebar */}
       <aside className="hidden md:flex md:flex-col h-screen w-64 bg-indigo-950 p-4">
         <SideBarContent isMobile={false} />
       </aside>
