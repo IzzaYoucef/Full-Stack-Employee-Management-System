@@ -29,7 +29,7 @@ const Employees = () => {
         </div>
         <button
           type="button"
-          className='flex items-center gap-2 px-2 rounded-md bg-[#4F39F6] text-white cursor-pointer'
+          className='flex items-center gap-2 px-2 h-10 rounded-md bg-[#4F39F6] text-white cursor-pointer'
         >
           <PlusIcon color='white' size={16} />
           <p className='text-sm font-normal'>Add Employee</p>
