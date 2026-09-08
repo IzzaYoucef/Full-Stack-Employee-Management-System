@@ -5,15 +5,31 @@ import { PlusIcon, SearchIcon } from 'lucide-react'
 const Employees = () => {
 
   const [employees, setEmployees] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(true) 
+  const [filtredEmployees , setFiltredEmployees] = useState([]) ; 
 
   const fetchEmployeesData = useCallback(async () => {
     setLoading(true)
-    setEmployees(dummyEmployeeData)
+    setEmployees(dummyEmployeeData) 
+    setFiltredEmployees(dummyEmployeeData);
     setTimeout(() => {
       setLoading(false)
     }, 500)
-  }, [])
+  }, []) 
+
+  const handleInputSearch = (e) => {
+    const query = e.target.value.toLowerCase()
+    setFiltredEmployees(
+      employees.filter((employee) =>
+        employee.firstName.toLowerCase().includes(query) ||
+        employee.lastName.toLowerCase().includes(query)
+      )
+    )
+  }
+
+  useEffect(()=> {
+    console.log(filtredEmployees);
+  } , [])
 
   useEffect(() => {
     fetchEmployeesData()
@@ -42,7 +58,8 @@ const Employees = () => {
         <input
           type="text"
           placeholder="Search employees"
-          className='w-full border border-gray-300 rounded-md pl-9 pr-3 py-2.5'
+          className='w-full border border-gray-300 rounded-md pl-9 pr-3 py-2.5' 
+          onChange={handleInputSearch}
         />
       </div>
 
@@ -53,10 +70,10 @@ const Employees = () => {
         </div>
       ) : (
         <div className='flex flex-wrap gap-4'>
-          {employees.map((em) => (
+          {filtredEmployees.map((em) => (
             <div
               key={em.id ?? `${em.firstName}-${em.lastName}`}
-              className='w-56 p-4 rounded-lg border border-gray-200 bg-white'
+              className='flex-1 w-56 p-4 rounded-lg border border-gray-200 bg-white'
             >
               <header className='text-sm text-gray-500 mb-3'>
                 {em.position}
