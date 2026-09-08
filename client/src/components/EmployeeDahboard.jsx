@@ -17,7 +17,7 @@ const EmployeeDahboard = ({ data }) => {
         {cardItems.map((item) => (
           <div
             key={item.title}
-            className='flex justify-between items-center p-6 border shadow border-gray-200 border-l-4 border-l-[#62748EB2] rounded-lg w-50'
+            className='flex flex-1 justify-between items-center p-6 border shadow border-gray-200 border-l-4 border-l-[#62748EB2] rounded-lg w-50'
           >
             <div className='flex flex-col gap-1'>
               <p className='font-medium text-sm text-[#314158]'>{item.title}</p>
