@@ -18,7 +18,7 @@ import { dummyProfileData } from '../assets/assets'
 const adminNavItems = [
   { label: "Dashboard", icon: LayoutDashboardIcon, to: "/dashboard" },
   { label: "Employees", icon: UsersIcon, to: "/employees" },
-  { label: "Attendance", icon: CalendarCheck, to: "/attendance" },
+  // { label: "Attendance", icon: CalendarCheck, to: "/attendance" },
   { label: "Leave", icon: CalendarX, to: "/leave" },
   { label: "PaySlips", icon: DollarSign, to: "/payslips" },
   { label: "Settings", icon: Settings, to: "/settings" },
