@@ -28,7 +28,7 @@ const App = () => {
           <Route path="employees" element={<Employees/>} />
           <Route path="attendance" element={<Attendance/>}/>
           <Route path="leave" element={<Leave/>}/>
-          <Route path="payslips" element={<PaySlips/>} />
+          <Route path='payslips' element={<PaySlips/>} />
           <Route path="settings" element={<Settings/>}/>
           <Route path="*" element={<Navigate to="dashboard" replace />} /> {/* unmatched → dashboard, still wrapped */}
         </Route>
