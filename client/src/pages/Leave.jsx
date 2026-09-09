@@ -61,7 +61,7 @@ const Leave = () => {
         </div>
         <button
           type="button"
-          className='flex items-center gap-2 px-4 py-2 rounded-md text-white cursor-pointer bg-[#4F39F6]'
+          className='flex items-center gap-2 px-4 py-2 rounded-md  text-white cursor-pointer bg-[#4F39F6]'
         >
           <PlusIcon size={16} />
           <span>Apply Leave</span>
