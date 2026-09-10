@@ -7,4 +7,4 @@
 * Add landing page and Admin/Employee login portals
 * Add sidebar navigation
 * Add dashboard with separate Admin and Employee views
-* Implement the pqges [ Employees , Attendance , Leave ] and filter input functionality 
+* Implement the pqges [ Employees , Attendance , Leave , Payslips , Settings ] and filter input functionality 
