@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { dummyLeaveData } from '../assets/assets'
 import { PlusIcon, ThermometerIcon, TreePalmIcon, UmbrellaIcon, Check, X } from 'lucide-react'
+import Loading from '../components/Loading'
 
 const statusStyles = {
   APPROVED: "bg-green-50 text-green-700",
@@ -99,9 +100,7 @@ const Leave = () => {
         </div>
 
         {loading ? (
-          <div className='flex justify-center items-center h-24'>
-            <span className='h-8 w-8 border-4 border-gray-200 border-t-indigo-600 rounded-full animate-spin'></span>
-          </div>
+          <Loading />
         ) : (
           leaves.map((l) => (
             <div
