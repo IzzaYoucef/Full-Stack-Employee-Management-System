@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { dummyAttendanceData } from '../assets/assets'
 import { Calendar1Icon, TimerIcon } from 'lucide-react'
+import Loading from '../components/Loading'
 
 const Attendance = () => {
 
@@ -67,9 +68,7 @@ const Attendance = () => {
         </div>
 
         {loading ? (
-          <div className='flex justify-center items-center h-24'>
-            <span className='h-8 w-8 border-4 border-gray-200 border-t-indigo-600 rounded-full animate-spin'></span>
-          </div>
+          <Loading />
         ) : (
           attendances.map((a, index) => (
             <div

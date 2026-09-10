@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { dummyPayslipData } from '../assets/assets'
 import { DownloadIcon, PlusIcon } from 'lucide-react'
+import Loading from '../components/Loading'
 
 const PaySlips = () => {
   const [loading, setLoading] = useState(true)
@@ -38,9 +39,7 @@ const PaySlips = () => {
       </div>
 
       {loading ? (
-        <div className='flex justify-center items-center h-40'>
-          <span className='h-8 w-8 border-4 border-gray-200 border-t-indigo-600 rounded-full animate-spin'></span>
-        </div>
+        <Loading />
       ) : (
         <div className='border border-gray-200 rounded p-2'>
           {/* Header row */}

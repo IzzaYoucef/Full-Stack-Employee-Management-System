@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { dummyAdminDashboardData, dummyEmployeeDashboardData } from '../assets/assets'
 import EmployeeDahboard from '../components/EmployeeDahboard'
 import AdminDashboard from '../components/AdminDashboard'
+import Loading from '../components/Loading'
 
 const Dashboard = () => {
     const [data, setData] = useState(null)
@@ -16,9 +17,7 @@ const Dashboard = () => {
 
     if (loading || !data) {
         return (
-            <div className='h-screen w-full flex justify-center items-center'>
-                <span className='h-10 w-10 border-4 border-gray-200 border-t-indigo-600 rounded-full animate-spin'></span>
-            </div>
+            <Loading />
         )
     }
 
