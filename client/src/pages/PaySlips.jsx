@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { dummyPayslipData } from '../assets/assets'
-import { DownloadIcon, PlusIcon } from 'lucide-react'
+import { DownloadIcon, PlusIcon } from 'lucide-react' 
+import { useNavigate } from 'react-router-dom'
 import Loading from '../components/Loading'
 
 const PaySlips = () => {
   const [loading, setLoading] = useState(true)
-  const [paySlips, setPaySlips] = useState([])
-
+  const [paySlips, setPaySlips] = useState([]) ; 
+  const navigate = useNavigate() ; 
   const fetchPaySlips = useCallback(async () => {
     setLoading(true)
     setPaySlips(dummyPayslipData)
@@ -64,12 +65,13 @@ const PaySlips = () => {
               <p className='capitalize text-gray-700 font-semibold'>${p.netSalary}</p>
               <button
                 type='button'
-                className='flex items-center gap-2 p-2 bg-gray-100 text-blue-600 justify-center rounded cursor-pointer'
+                className='flex items-center gap-2 p-2 bg-gray-100 text-blue-600 justify-center rounded cursor-pointer' 
+                onClick={()=>{console.log("Navigate")  ; navigate(`${"/print/payslip/" + p._id}`)}}
               >
                 <DownloadIcon size={16} />
                 <span>Download</span>
               </button>
-            </div>
+            </div> 
           ))}
         </div>
       )}
