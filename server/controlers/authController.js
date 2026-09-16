@@ -65,7 +65,7 @@ export const session = async (req , res) => {
 // change password Admin / Employee  
 // POST /api/auth/change-password 
 export const changePassword = async (req, res) => {
-    try {
+    try { 
         const { currentPassword, newPassword } = req.body;
  
         if (!currentPassword || !newPassword) {
@@ -84,7 +84,7 @@ export const changePassword = async (req, res) => {
         }
  
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await userModel.findByIdAndUpdate(user._id, { password: hashedPassword });
+        await userModel.findByIdAndUpdate(session.userId, { password: hashedPassword });
  
         return res.status(200).json({ success: true, message: "Password updated successfully" });
     } catch (error) {
