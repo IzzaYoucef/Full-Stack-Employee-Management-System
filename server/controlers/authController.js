@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import userModel from "../models/User.js";
+import employeeModel from "../models/Employee.js";
 
 const createToken = (payload) => {
     return jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn: "1d" });
@@ -21,19 +22,25 @@ export const login = async (req, res) => {
             return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        // Compare le mot de passe reçu avec le hash stocké (et non l'inverse)
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
             return res.status(401).json({ success: false, message: "Invalid password" });
         }
 
-        // Rejette si le rôle demandé ne correspond PAS au rôle réel
         if (user_role === "admin" && user.role !== "ADMIN") {
             return res.status(403).json({ success: false, message: "Not authorized as Admin" });
         }
 
         if (user_role === "employee" && user.role !== "EMPLOYEE") {
             return res.status(403).json({ success: false, message: "Not authorized as Employee" });
+        }
+
+        // Bloque l'accès si le profil employé lié a été supprimé (soft-delete)
+        if (user.role === "EMPLOYEE") {
+            const employeeRecord = await employeeModel.findOne({ userId: user._id });
+            if (employeeRecord?.isDeleted) {
+                return res.status(403).json({ success: false, message: "This account has been deactivated" });
+            }
         }
 
         const payload = {
@@ -52,40 +59,39 @@ export const login = async (req, res) => {
         console.error(error);
         return res.status(500).json({ success: false, message: "Login failed" });
     }
-}; 
+};
 
-// Cretae Session for the Admin/Employee 
+// Renvoie l'identité de l'utilisateur connecté, déduite du JWT
+// (nécessite que la route applique le middleware "protect" avant ce handler)
 // GET /api/auth/session
+export const session = async (req, res) => {
+    return res.json({ success: true, data: req.user });
+};
 
-export const session = async (req , res) => {
-    const session = req.session ; 
-    res.json({user:session}) ;
-}
-
-// change password Admin / Employee  
-// POST /api/auth/change-password 
+// change password Admin / Employee
+// POST /api/auth/change-password
 export const changePassword = async (req, res) => {
-    try { 
+    try {
         const { currentPassword, newPassword } = req.body;
- 
+
         if (!currentPassword || !newPassword) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
         }
- 
-        // req.user vient du JWT décodé par authMiddleware, pas de req.session
-        const user = await userModel.findById(req.user._id);
+
+        // req.user.user_id vient du JWT décodé par le middleware "protect"
+        const user = await userModel.findById(req.user.user_id);
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
         }
- 
+
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
             return res.status(400).json({ success: false, message: "Invalid password" });
         }
- 
+
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await userModel.findByIdAndUpdate(session.userId, { password: hashedPassword });
- 
+        await userModel.findByIdAndUpdate(user._id, { password: hashedPassword });
+
         return res.status(200).json({ success: true, message: "Password updated successfully" });
     } catch (error) {
         console.error(error);
