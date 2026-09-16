@@ -6,6 +6,7 @@ import { connectDb } from "./config/db.js";
 import authRouter from "./routes/authRoute.js";
 import employeeModel from "./models/Employee.js";
 import employeeRouter from "./routes/employeeRoute.js";
+import profileRouter from "./routes/profileRoute.js";
 
 //  Instance of express
 const app  = express() ; 
@@ -26,6 +27,7 @@ app.get("/" , (req , res) => {
 })
 
 app.use("/api/auth" , authRouter) ; 
-app.use("/api/employees" , employeeRouter) ; 
+app.use("/api/employees" , employeeRouter) ;  
+profileRouter.use("/api/profile"); 
 // running the server 
 app.listen(PORT , () => console.log(`Server runing in http://localhost:${PORT}/`))
