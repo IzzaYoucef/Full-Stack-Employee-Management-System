@@ -35,4 +35,29 @@ export const getProfile = async (req, res) => {
         console.error(error);
         return res.status(500).json({ success: false, message: "Failed to fetch profile" });
     }
-};
+}; 
+
+const updateEmployee = async (req , res) => {
+  
+    try {
+        const {user_id} = req.user ; 
+        const employee = await employeeModel.findById(user_id) ; 
+
+        if(!employee) {
+            return res.status(404).json({success:false , message:"User Not Found"}) ; 
+        }
+
+        if(!employee.isDeleted) {
+            return res.status(404).json({success:false , message:"User Deleted"}) ; 
+        }  
+
+        await employeeModel.findByIdAndUpdate(user_id , {
+            bio:req.body.bio
+        }) ; 
+
+        return res.status(201).json({success:false , message:"User Profile Updated"}) ; 
+    } catch (error) {
+        return res.status(500).json({success:false , message:error.message});
+    }
+
+}
