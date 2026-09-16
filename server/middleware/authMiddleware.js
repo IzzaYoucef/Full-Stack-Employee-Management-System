@@ -1,26 +1,27 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
-export const protect = (req , res ,  next) => {
+export const protect = (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization ; 
-        if(!authHeader || !authHeader.startWith("Bearer ")){
-            res.status(401).json({success:false , message:"Unauthorized"});
-        } 
+        const authHeader = req.headers.authorization;
 
-        const token = authHeader.split(" ")[1] ; 
-        const session = jwt.verify(token , precess.env.JWT_SECRET_KEY);
-        if(!session){
-            return res.status(401).json({success:false , message:"Unauthorized"})
-        } 
-        next(); 
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res.status(401).json({ success: false, message: "No token provided" });
+        }
+
+        const token = authHeader.split(" ")[1];
+        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+
+        req.user = decoded; // { user_id, email, user_role }
+        next();
     } catch (error) {
-        return res.status(401).json({success:false , message:error.message})
+        return res.status(401).json({ success: false, message: "Invalid or expired token" });
     }
-}  
+};
 
-export const protectAdmin = (req,res,next) => {
-    if(req?.session?.role !== "ADMIN"){
-        return res.status(403).json({success:false , message:"Admin Access Required"})
-    } 
-    next() ; 
-}
+// À utiliser après "protect" — s'appuie sur req.user déjà renseigné
+export const protectAdmin = (req, res, next) => {
+    if (req.user?.user_role !== "admin") {
+        return res.status(403).json({ success: false, message: "Admin access required" });
+    }
+    next();
+};
