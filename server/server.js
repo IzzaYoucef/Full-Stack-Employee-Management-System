@@ -3,6 +3,9 @@ import cors from "cors" ;
 import multer from "multer" ;    
 import 'dotenv/config' ; 
 import { connectDb } from "./config/db.js";
+import authRouter from "./routes/authRoute.js";
+import employeeModel from "./models/Employee.js";
+import employeeRouter from "./routes/employeeRoute.js";
 
 //  Instance of express
 const app  = express() ; 
@@ -22,5 +25,7 @@ app.get("/" , (req , res) => {
     res.send("SERVER RINNING") ; 
 })
 
+app.use("/api/auth" , authRouter) ; 
+app.use("/api/employees" , employeeRouter) ; 
 // running the server 
 app.listen(PORT , () => console.log(`Server runing in http://localhost:${PORT}/`))
