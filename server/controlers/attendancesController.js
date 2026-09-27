@@ -5,7 +5,7 @@ import employeeModel from "../models/Employee";
 // POST /api/attendance 
 export const clockInOut = async (req , res) => {
     try {
-            const session = req.session ; 
+         const session = req.session ; 
 
     const employee = await employeeModel.findOne({userId:session.userId})  ;  
 
@@ -49,11 +49,29 @@ export const clockInOut = async (req , res) => {
         else if(workingHoures >= 4) dayType = "Half Day" 
 
         existing.dayType = dayType ; 
-        existing.workingHoures = workingHoures ;  
+        existing.workingHoures = workingHoures ;   
+
 
         return res.json({success:true , message:attendance}) ; 
     }
     } catch (error) {
         return res.json({success:false , message:error.message}) ;    
+    }
+} 
+
+export const getAttendance = async (req , res) => {
+    try{
+        const session = req.session ; 
+        const employee = await employeeModel.findOne({userId:session.userId})  ;    
+        if(!employee) {
+            return res.status(404).json({success:false , message:"User Not Found"})
+        }
+        const limit = req.query.limit || 30  ;
+        const history = Attendance.find({employeeId:employee._id}).sort({date:-1}).limit(limit) ; 
+
+        return res.status(201).json({success:false , data:history , employee:{isDeleted:employee.isDeleted}}) ; 
+
+    }catch(error){
+        return res.status(500).message({success:false , message:error.message})
     }
 }
