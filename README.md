@@ -41,6 +41,7 @@ A full-stack web application for managing employees, built with React (Vite) on 
 - [x] Add JWT auth middleware to protect private routes
 - [x] Build Employee CRUD API (list with department filter, create, update, delete)
 - [x] Standardize all API responses to a consistent JSON format (`{ success, data, message }`)
+- [x] Define Attendance Leave and Leave Models With there controllers functions and routes
 
 ## Project Structure
 
