@@ -44,22 +44,7 @@ A full-stack web application for managing employees, built with React (Vite) on 
 - [x] Define Attendance Leave and Leave Models With there controllers functions and routes
 
 ## Project Structure
-
-```
-Full-Stack-Employee-Management-System/
-├── client/                 # React (Vite) frontend
-│   └── src/
-│       ├── assets/
-│       ├── components/     # Loading, ChangePassword, Sidebar, etc.
-│       └── pages/          # Settings, Employees, Attendance, Leave, Payslips
-└── server/                 # Express backend
-    ├── constants/
-    ├── controllers/        # employeeController.js, authController.js
-    ├── middleware/          # authMiddleware.js
-    ├── models/              # Employee.js, User.js
-    ├── routes/
-    └── server.js
-```
+// I will add it when i will finich the task 
 
 > Adjust this tree to match your actual folder layout if it differs.
 
