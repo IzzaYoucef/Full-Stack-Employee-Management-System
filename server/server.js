@@ -8,6 +8,7 @@ import employeeModel from "./models/Employee.js";
 import employeeRouter from "./routes/employeeRoute.js";
 import profileRouter from "./routes/profileRoute.js";
 import attendanceRouter from "./routes/attendancesRoute.js";
+import leaveRouter from "./routes/leavesRouter.js";
 
 //  Instance of express
 const app  = express() ; 
@@ -30,6 +31,7 @@ app.get("/" , (req , res) => {
 app.use("/api/auth" , authRouter) ; 
 app.use("/api/employees" , employeeRouter) ;  
 profileRouter.use("/api/profile");  
-attendanceRouter.use("/api/attendances")
+attendanceRouter.use("/api/attendances") ;
+leaveRouter.use("/api/leave") ; 
 // running the server 
 app.listen(PORT , () => console.log(`Server runing in http://localhost:${PORT}/`))

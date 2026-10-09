@@ -73,4 +73,65 @@ export const getLeaves = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }
+}; 
+// Petite fonction utilitaire
+const isAdmin = (req) => req.session?.role === "ADMIN";
+
+// GET /api/leave/all?status=PENDING   (admin)
+export const getAllLeaves = async (req, res) => {
+  try {
+    if (!isAdmin(req)) {
+      return res.status(403).json({ success: false, message: "Admin access only" });
+    }
+
+    const { status } = req.query;
+    const filter = status ? { status } : {};
+
+    const leaves = await LeaveApplication.find(filter)
+      .populate("employeeId")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({ success: true, data: leaves });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
+
+// PATCH /api/leave/:id/status   (admin)   body: { "status": "APPROVED" }
+export const updateLeaveStatus = async (req, res) => {
+  try {
+    if (!isAdmin(req)) {
+      return res.status(403).json({ success: false, message: "Admin access only" });
+    }
+
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["APPROVED", "REJECTED"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Status must be APPROVED or REJECTED",
+      });
+    }
+
+    const leave = await LeaveApplication.findById(id);
+
+    if (!leave) {
+      return res.status(404).json({ success: false, message: "Leave not found" });
+    }
+
+    if (leave.status !== "PENDING") {
+      return res.status(400).json({
+        success: false,
+        message: `Leave already ${leave.status.toLowerCase()}`,
+      });
+    }
+
+    leave.status = status;
+    await leave.save();
+
+    return res.status(200).json({ success: true, data: leave });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
