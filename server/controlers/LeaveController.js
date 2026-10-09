@@ -1,53 +1,137 @@
-import Employee from "../models/Employee.js"
-import leaveApplication from "../models/LeaveApplication.js";
-// Create Leave  
-// POST api/leave 
+import Employee from "../models/Employee.js";
+import LeaveApplication from "../models/LeaveApplication.js";
 
-export const createLeave = async(req , res) => { 
+// POST /api/leave
+export const createLeave = async (req, res) => {
+  try {
+    const employee = await Employee.findOne({ userId: req.session.userId });
 
-    try {
-
-        const session = req.session ;  
-
-        const employee = await Employee.findOne({userId:session.userId}) ; 
-
-        if(!employee) return res.status(404).json({success:flase , message:"Employee Not found"}) 
-
-        if(employee.isDeleted) return res.status(403).json({success:false , message:"Accound is Deactivated"}) ; 
-        
-        const {type , startDate , endDate , reason} = req.body ; 
-
-        if(!type || !startDate || !endDate || !reason){
-            res.status(400).json({error:"Missing feilds"})
-        } 
-
-        const today = new Date() ; 
-        today.setHours(0 , 0 , 0 , 0) ; 
-
-        if(new Date(startDate) < today || new Date(endDate) <= today){
-        res.status(400).json({error:"The date must be in the future"}) ; 
-        }
-
-        if(new Date(endDate) < new Date(startDate)){
-            res.status(400).json({error:"End date must be grater thean start day"})
-        } 
-
-        const leave = await leaveApplication.create({
-            employeeId:employee._id ,
-            type , 
-            startDate : new Date(startDate) , 
-            endDate : new Date(endDate) , 
-            reason , 
-            status:"PENDING"
-        }) ; 
-        return res.json({success:true , data:leave}) ;
-    } catch (error) {
-        res.status(500).json({success:false , message:error.message()})
+    if (!employee) {
+      return res.status(404).json({ success: false, message: "Employee not found" });
     }
 
+    if (employee.isDeleted) {
+      return res.status(403).json({ success: false, message: "Account is deactivated" });
+    }
+
+    const { type, startDate, endDate, reason } = req.body;
+
+    if (!type || !startDate || !endDate || !reason) {
+      return res.status(400).json({ success: false, message: "Missing fields" });
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    if (isNaN(start) || isNaN(end)) {
+      return res.status(400).json({ success: false, message: "Invalid date format" });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (start < today || end < today) {
+      return res.status(400).json({ success: false, message: "Dates must be in the future" });
+    }
+
+    if (end < start) {
+      return res.status(400).json({
+        success: false,
+        message: "End date must be after or equal to start date",
+      });
+    }
+
+    const leave = await LeaveApplication.create({
+      employeeId: employee._id,
+      type,
+      startDate: start,
+      endDate: end,
+      reason,
+      status: "PENDING",
+    });
+
+    return res.status(201).json({ success: true, data: leave });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// GET /api/leave
+export const getLeaves = async (req, res) => {
+  try {
+    const employee = await Employee.findOne({ userId: req.session.userId });
+
+    if (!employee) {
+      return res.status(404).json({ success: false, message: "Employee not found" });
+    }
+
+    const leaves = await LeaveApplication.find({ employeeId: employee._id }).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json({ success: true, data: leaves });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}; 
+// Petite fonction utilitaire
+const isAdmin = (req) => req.session?.role === "ADMIN";
+
+// GET /api/leave/all?status=PENDING   (admin)
+export const getAllLeaves = async (req, res) => {
+  try {
+    if (!isAdmin(req)) {
+      return res.status(403).json({ success: false, message: "Admin access only" });
+    }
+
+    const { status } = req.query;
+    const filter = status ? { status } : {};
+
+    const leaves = await LeaveApplication.find(filter)
+      .populate("employeeId")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({ success: true, data: leaves });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// PATCH /api/leave/:id/status   (admin)   body: { "status": "APPROVED" }
+export const updateLeaveStatus = async (req, res) => {
+  try {
+    if (!isAdmin(req)) {
+      return res.status(403).json({ success: false, message: "Admin access only" });
+    }
+
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["APPROVED", "REJECTED"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Status must be APPROVED or REJECTED",
+      });
+    }
+
+    const leave = await LeaveApplication.findById(id);
+
+    if (!leave) {
+      return res.status(404).json({ success: false, message: "Leave not found" });
+    }
+
+    if (leave.status !== "PENDING") {
+      return res.status(400).json({
+        success: false,
+        message: `Leave already ${leave.status.toLowerCase()}`,
+      });
+    }
+
+    leave.status = status;
+    await leave.save();
+
+    return res.status(200).json({ success: true, data: leave });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 }
-
-
-// GET
-// Get Leaves 
-
