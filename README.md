@@ -42,6 +42,7 @@ A full-stack web application for managing employees, built with React (Vite) on 
 - [x] Build Employee CRUD API (list with department filter, create, update, delete)
 - [x] Standardize all API responses to a consistent JSON format (`{ success, data, message }`)
 - [x] Define Attendance Leave and Leave Models With there controllers functions and routes
+- [x] Create payslip model and his controllers functions 
 
 ## Project Structure
 // I will add it when i will finich the task 
@@ -53,7 +54,7 @@ A full-stack web application for managing employees, built with React (Vite) on 
 ### Prerequisites
 - Node.js (v18+ recommended)
 - A MongoDB database (local or MongoDB Atlas)
-
+- React js , Express js , version controll git 
 ### Installation
 
 **1. Clone the repository**
