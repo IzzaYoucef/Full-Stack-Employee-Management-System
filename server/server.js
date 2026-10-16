@@ -2,7 +2,7 @@ import express from "express" ;
 import cors from "cors" ;  
 import multer from "multer" ;    
 import 'dotenv/config' ; 
-import { connectDb } from "./config/db.js";
+import { connectDb } from "./config/db.js"; 
 import authRouter from "./routes/authRoute.js";
 import employeeModel from "./models/Employee.js";
 import employeeRouter from "./routes/employeeRoute.js";
