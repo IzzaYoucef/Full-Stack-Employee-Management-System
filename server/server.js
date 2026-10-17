@@ -9,6 +9,7 @@ import profileRouter from "./routes/profileRoute.js";
 import attendanceRouter from "./routes/attendancesRoute.js";
 import leaveRouter from "./routes/leavesRouter.js";
 import payslipRoute from "./routes/payslipsRoute.js";
+import dashboardRoute from "./routes/dashboardRoute.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -31,8 +32,8 @@ app.use("/api/employees", employeeRouter);
 app.use("/api/profile", profileRouter);
 app.use("/api/attendances", attendanceRouter);
 app.use("/api/leave", leaveRouter);
-app.use("/api/payslips", payslipRoute);
-
+app.use("/api/payslips", payslipRoute); 
+app.use("/api/dashboard" , dashboardRoute);
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({ success: false, message: "Route not found" });
