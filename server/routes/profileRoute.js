@@ -1,13 +1,10 @@
-import { Router } from "express"; 
-import { protect } from "../middleware/authMiddleware";
-import { getProfile } from "../controlers/profileController";
-import { updateEmployee } from "../controlers/employeeController";
+import { Router } from "express";
+import { protect } from "../middleware/authMiddleware.js";
+import { getProfile, updateProfile } from "../controlers/profileController.js";
 
+const profileRouter = Router();
 
-const profileRouter = Router()  ;
+profileRouter.get("/", protect, getProfile);
+profileRouter.post("/", protect, updateProfile);
 
-
-profileRouter.get("/" , protect ,  getProfile) ; 
-profileRouter.post("/" , protect , updateEmployee) ; 
-
-export default profileRouter ; 
+export default profileRouter;

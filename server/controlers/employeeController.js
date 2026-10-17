@@ -1,13 +1,14 @@
-import Employee from "../models/Employee.js"; // adaptez le chemin à votre structure de dossiers
+import Employee from "../models/Employee.js";
 import userModel from "../models/User.js";
 import bcrypt from "bcrypt";
 
-// GET the employees from the database
-// /api/employees
+const ROLES = ["ADMIN", "EMPLOYEE"];
+
+// GET /api/employees
 export const getEmployees = async (req, res) => {
     try {
         const { department } = req.query;
-        const where = {};
+        const where = { isDeleted: false }; // soft-deleted employees are hidden
         if (department) where.department = department;
 
         const employees = await Employee.find(where)
@@ -28,38 +29,28 @@ export const getEmployees = async (req, res) => {
     }
 };
 
-// POST Add an Employee
-// /api/employees
+// POST /api/employees
 export const createEmployee = async (req, res) => {
+    let user = null;
     try {
         const {
-            firstName,
-            lastName,
-            email,
-            phone,
-            position,
-            department,
-            basicSalary,
-            allowances,
-            deductions,
-            joinDate,
-            password,
-            role,
-            bio,
+            firstName, lastName, email, phone, position, department,
+            basicSalary, allowances, deductions, joinDate, password, role, bio,
         } = req.body;
 
         if (!firstName || !lastName || !email || !password) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
         }
 
+        const userRole = role ? String(role).toUpperCase() : "EMPLOYEE";
+        if (!ROLES.includes(userRole)) {
+            return res.status(400).json({ success: false, message: "Invalid role" });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Crée d'abord le compte User, pour pouvoir lier son id à l'employé
-        const user = await userModel.create({
-            email,
-            password: hashedPassword,
-            role: role || "EMPLOYEE",
-        });
+        // Create the User first so its id can be linked to the Employee
+        user = await userModel.create({ email, password: hashedPassword, role: userRole });
 
         const employee = await Employee.create({
             userId: user._id,
@@ -80,98 +71,88 @@ export const createEmployee = async (req, res) => {
             .status(201)
             .json({ success: true, data: employee, message: "Employee created successfully" });
     } catch (error) {
+        // Don't leave an orphan User behind if the Employee couldn't be created
+        if (user) await userModel.findByIdAndDelete(user._id).catch(() => {});
+
         if (error.code === 11000) {
             return res.status(400).json({ success: false, message: "Email already exists" });
+        }
+        if (error.name === "ValidationError") {
+            return res.status(400).json({ success: false, message: error.message });
         }
         console.error(error);
         return res.status(500).json({ success: false, message: "Failed to create employee" });
     }
 };
 
-// PUT Update an employee in the database
-// /api/employees/:id
+// PUT /api/employees/:id   (admin)
 export const updateEmployee = async (req, res) => {
     try {
         const { id } = req.params;
-        const {
-            firstName,
-            lastName,
-            email,
-            phone,
-            position,
-            department,
-            basicSalary,
-            allowances,
-            deductions,
-            employeeStatus,
-            password,
-            role,
-            bio,
-        } = req.body;
+        const { password, role, ...fields } = req.body;
 
-        // On vérifie l'existence via l'id des params
         const employee = await Employee.findById(id);
         if (!employee) {
             return res.status(404).json({ success: false, message: "Employee not found" });
         }
 
-        // Met à jour l'employé — on garde l'ancienne valeur si le champ n'est pas envoyé
-        const updatedEmployee = await Employee.findByIdAndUpdate(
-            id,
-            {
-                firstName,
-                lastName,
-                email,
-                phone,
-                position,
-                department: department || employee.department || "Engineering",
-                basicSalary: basicSalary !== undefined ? Number(basicSalary) : employee.basicSalary,
-                allowances: Number(allowances) || 0,
-                deductions: Number(deductions) || 0,
-                employeeStatus: employeeStatus || "ACTIVE",
-                bio: bio || "", 
-                isDeleted: false
-            },
-            { new: true } // renvoie le document mis à jour, pas l'ancien
-        );
+        // Only update the fields that were actually sent (don't reset the others)
+        const editable = [
+            "firstName", "lastName", "email", "phone", "position", "department",
+            "employeeStatus", "bio",
+        ];
+        for (const key of editable) {
+            if (fields[key] !== undefined) employee[key] = fields[key];
+        }
+        for (const key of ["basicSalary", "allowances", "deductions"]) {
+            if (fields[key] !== undefined) employee[key] = Number(fields[key]) || 0;
+        }
+        if (fields.joinDate) employee.joinDate = new Date(fields.joinDate);
 
-        // Met à jour le compte User lié (email, rôle, mot de passe)
+        await employee.save();
+
+        // Sync the linked User account (email, role, password)
         const userUpdate = {};
-        if (email) userUpdate.email = email;
-        if (role) userUpdate.role = role;
+        if (fields.email) userUpdate.email = fields.email;
+        if (role) {
+            const userRole = String(role).toUpperCase();
+            if (!ROLES.includes(userRole)) {
+                return res.status(400).json({ success: false, message: "Invalid role" });
+            }
+            userUpdate.role = userRole;
+        }
         if (password) userUpdate.password = await bcrypt.hash(password, 10);
 
         if (Object.keys(userUpdate).length > 0) {
             await userModel.findByIdAndUpdate(employee.userId, userUpdate);
         }
 
-        return res.json({
-            success: true,
-            data: updatedEmployee,
-            message: "Employee updated successfully",
-        });
+        return res.json({ success: true, data: employee, message: "Employee updated successfully" });
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ success: false, message: "Email already exists" });
+        }
+        if (error.name === "ValidationError" || error.name === "CastError") {
+            return res.status(400).json({ success: false, message: error.message });
+        }
         console.error(error);
-        return res
-            .status(500)
-            .json({ success: false, message: "Error in User/Employee update function" });
+        return res.status(500).json({ success: false, message: "Error updating employee" });
     }
 };
 
-// DELETE Delete an employee from the database
-// /api/employees/:id
+// DELETE /api/employees/:id   (soft delete)
 export const deleteEmployee = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Vérifie que l'employé existe (avec await, sinon on teste une Promise, toujours truthy)
         const employee = await Employee.findById(id);
         if (!employee) {
             return res.status(404).json({ success: false, message: "Employee not found" });
         }
-        employee.isDeleted = true ;  
-        employee.employeeStatus = "INACTIVE" , 
-        await employee.svae(); 
+
+        employee.isDeleted = true;
+        employee.employeeStatus = "INACTIVE";
+        await employee.save();
 
         return res.json({ success: true, message: "Employee has been deleted successfully" });
     } catch (error) {

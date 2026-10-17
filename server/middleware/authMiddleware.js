@@ -11,14 +11,14 @@ export const protect = (req, res, next) => {
         const token = authHeader.split(" ")[1];
         const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-        req.user = decoded; // { user_id, email, user_role }
+        req.user = decoded; // { user_id, email, user_role: "admin" | "employee" }
         next();
     } catch (error) {
         return res.status(401).json({ success: false, message: "Invalid or expired token" });
     }
 };
 
-// À utiliser après "protect" — s'appuie sur req.user déjà renseigné
+// Use after "protect" — relies on req.user being populated
 export const protectAdmin = (req, res, next) => {
     if (req.user?.user_role !== "admin") {
         return res.status(403).json({ success: false, message: "Admin access required" });

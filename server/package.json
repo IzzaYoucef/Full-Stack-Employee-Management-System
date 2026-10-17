@@ -1,11 +1,11 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
-  "main": "server.js", 
-  "type":"module",
+  "description": "Employee Management System API",
+  "main": "server.js",
+  "type": "module",
   "scripts": {
-    "server":"nodemon server.js" , 
+    "server": "nodemon server.js",
     "start": "node server.js"
   },
   "keywords": [],
@@ -13,7 +13,6 @@
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "corps": "^0.1.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",

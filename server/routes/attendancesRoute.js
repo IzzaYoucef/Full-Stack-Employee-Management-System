@@ -1,10 +1,10 @@
-import {Router} from 'express' ; 
-import { protect } from '../middleware/authMiddleware';
-import { clockInOut, getAttendance } from '../controlers/attendancesController';
-const attendanceRouter = Router() ; 
+import { Router } from "express";
+import { protect } from "../middleware/authMiddleware.js";
+import { clockInOut, getAttendance } from "../controlers/attendancesController.js";
 
+const attendanceRouter = Router();
 
-attendanceRouter.post("/" , protect , clockInOut ) ; 
-attendanceRouter.get("/" , protect , getAttendance) ;
+attendanceRouter.post("/", protect, clockInOut);
+attendanceRouter.get("/", protect, getAttendance);
 
-export default attendanceRouter ; 
+export default attendanceRouter;
