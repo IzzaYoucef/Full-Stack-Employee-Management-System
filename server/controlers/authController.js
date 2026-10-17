@@ -8,34 +8,35 @@ const createToken = (payload) => {
 };
 
 // Login the Users : Admin and Employee
-// POST /api/auth/login
+// POST /api/auth/login   (public)
 export const login = async (req, res) => {
     try {
         const { email, password, user_role } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ success: false, message: "Invalid credentials" });
+            return res.status(400).json({ success: false, message: "Email and password are required" });
         }
 
-        const user = await userModel.findOne({ email });
+        const user = await userModel.findOne({ email: String(email).toLowerCase().trim() });
+        // Same message for unknown email and wrong password, so accounts can't be enumerated
         if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
+            return res.status(401).json({ success: false, message: "Invalid credentials" });
         }
 
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
-            return res.status(401).json({ success: false, message: "Invalid password" });
+            return res.status(401).json({ success: false, message: "Invalid credentials" });
         }
 
+        // Optional: the login form says which portal the person is using
         if (user_role === "admin" && user.role !== "ADMIN") {
             return res.status(403).json({ success: false, message: "Not authorized as Admin" });
         }
-
         if (user_role === "employee" && user.role !== "EMPLOYEE") {
             return res.status(403).json({ success: false, message: "Not authorized as Employee" });
         }
 
-        // Bloque l'accès si le profil employé lié a été supprimé (soft-delete)
+        // Block access if the linked employee profile was soft-deleted
         if (user.role === "EMPLOYEE") {
             const employeeRecord = await employeeModel.findOne({ userId: user._id });
             if (employeeRecord?.isDeleted) {
@@ -43,10 +44,11 @@ export const login = async (req, res) => {
             }
         }
 
+        // The role in the token comes from the DB, never from the request body
         const payload = {
             user_id: user._id,
             email: user.email,
-            user_role,
+            user_role: user.role.toLowerCase(), // "admin" | "employee"
         };
 
         const token = createToken(payload);
@@ -61,14 +63,11 @@ export const login = async (req, res) => {
     }
 };
 
-// Renvoie l'identité de l'utilisateur connecté, déduite du JWT
-// (nécessite que la route applique le middleware "protect" avant ce handler)
 // GET /api/auth/session
 export const session = async (req, res) => {
     return res.json({ success: true, data: req.user });
 };
 
-// change password Admin / Employee
 // POST /api/auth/change-password
 export const changePassword = async (req, res) => {
     try {
@@ -77,8 +76,10 @@ export const changePassword = async (req, res) => {
         if (!currentPassword || !newPassword) {
             return res.status(400).json({ success: false, message: "Missing required fields" });
         }
+        if (String(newPassword).length < 6) {
+            return res.status(400).json({ success: false, message: "New password must be at least 6 characters" });
+        }
 
-        // req.user.user_id vient du JWT décodé par le middleware "protect"
         const user = await userModel.findById(req.user.user_id);
         if (!user) {
             return res.status(404).json({ success: false, message: "User not found" });
@@ -86,15 +87,15 @@ export const changePassword = async (req, res) => {
 
         const isMatch = await bcrypt.compare(currentPassword, user.password);
         if (!isMatch) {
-            return res.status(400).json({ success: false, message: "Invalid password" });
+            return res.status(400).json({ success: false, message: "Current password is incorrect" });
         }
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
-        await userModel.findByIdAndUpdate(user._id, { password: hashedPassword });
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
 
         return res.status(200).json({ success: true, message: "Password updated successfully" });
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ success: false, message: error.message });
+        return res.status(500).json({ success: false, message: "Failed to update password" });
     }
 };

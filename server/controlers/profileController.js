@@ -1,14 +1,11 @@
 import employeeModel from "../models/Employee.js";
 
-// GET the logged-in user's own profile
-// GET /api/profile
-// Nécessite le middleware "protect" en amont (fournit req.user)
+// GET /api/profile  — the logged-in user's own profile
 export const getProfile = async (req, res) => {
     try {
         const { user_id } = req.user;
 
-        // req.user.user_id est l'id du User (issu du JWT), pas celui de l'Employee.
-        // Il faut donc chercher l'employé PAR son userId, pas par son propre _id.
+        // user_id is the User's id (from the JWT), not the Employee's _id
         const employee = await employeeModel
             .findOne({ userId: user_id })
             .populate("userId", "email role")
@@ -35,29 +32,27 @@ export const getProfile = async (req, res) => {
         console.error(error);
         return res.status(500).json({ success: false, message: "Failed to fetch profile" });
     }
-}; 
+};
 
-const updateEmployee = async (req , res) => {
-  
+// POST /api/profile  — an employee can only update their own bio
+export const updateProfile = async (req, res) => {
     try {
-        const {user_id} = req.user ; 
-        const employee = await employeeModel.findById(user_id) ; 
+        const { user_id } = req.user;
+        const employee = await employeeModel.findOne({ userId: user_id });
 
-        if(!employee) {
-            return res.status(404).json({success:false , message:"User Not Found"}) ; 
+        if (!employee) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+        if (employee.isDeleted) {
+            return res.status(403).json({ success: false, message: "Account is deactivated" });
         }
 
-        if(!employee.isDeleted) {
-            return res.status(404).json({success:false , message:"User Deleted"}) ; 
-        }  
+        employee.bio = req.body.bio ?? employee.bio;
+        await employee.save();
 
-        await employeeModel.findByIdAndUpdate(user_id , {
-            bio:req.body.bio
-        }) ; 
-
-        return res.status(201).json({success:false , message:"User Profile Updated"}) ; 
+        return res.json({ success: true, message: "Profile updated" });
     } catch (error) {
-        return res.status(500).json({success:false , message:error.message});
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
     }
-
-}
+};

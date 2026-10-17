@@ -4,7 +4,7 @@ import LeaveApplication from "../models/LeaveApplication.js";
 // POST /api/leave
 export const createLeave = async (req, res) => {
   try {
-    const employee = await Employee.findOne({ userId: req.session.userId });
+    const employee = await Employee.findOne({ userId: req.user.user_id });
 
     if (!employee) {
       return res.status(404).json({ success: false, message: "Employee not found" });
@@ -59,7 +59,7 @@ export const createLeave = async (req, res) => {
 // GET /api/leave
 export const getLeaves = async (req, res) => {
   try {
-    const employee = await Employee.findOne({ userId: req.session.userId });
+    const employee = await Employee.findOne({ userId: req.user.user_id });
 
     if (!employee) {
       return res.status(404).json({ success: false, message: "Employee not found" });
@@ -74,18 +74,17 @@ export const getLeaves = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 }; 
-// Petite fonction utilitaire
-const isAdmin = (req) => req.session?.role === "ADMIN";
-
 // GET /api/leave/all?status=PENDING   (admin)
 export const getAllLeaves = async (req, res) => {
   try {
-    if (!isAdmin(req)) {
-      return res.status(403).json({ success: false, message: "Admin access only" });
-    }
-
     const { status } = req.query;
-    const filter = status ? { status } : {};
+    const filter = {};
+    if (status) {
+      if (!["PENDING", "APPROVED", "REJECTED"].includes(status)) {
+        return res.status(400).json({ success: false, message: "Invalid status filter" });
+      }
+      filter.status = status;
+    }
 
     const leaves = await LeaveApplication.find(filter)
       .populate("employeeId")
@@ -100,10 +99,6 @@ export const getAllLeaves = async (req, res) => {
 // PATCH /api/leave/:id/status   (admin)   body: { "status": "APPROVED" }
 export const updateLeaveStatus = async (req, res) => {
   try {
-    if (!isAdmin(req)) {
-      return res.status(403).json({ success: false, message: "Admin access only" });
-    }
-
     const { id } = req.params;
     const { status } = req.body;
 

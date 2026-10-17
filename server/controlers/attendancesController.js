@@ -1,77 +1,94 @@
-import Attendance from "../models/Attendances";
-import employeeModel from "../models/Employee";
+import Attendance from "../models/Attendances.js";
+import employeeModel from "../models/Employee.js";
 
+// An employee arriving after this time is marked LATE
+const WORK_START_HOUR = 9;
+const WORK_START_MINUTE = 30;
 
-// POST /api/attendance 
-export const clockInOut = async (req , res) => {
+// POST /api/attendances  — first call = check-in, second call = check-out
+export const clockInOut = async (req, res) => {
     try {
-         const session = req.session ; 
+        const employee = await employeeModel.findOne({ userId: req.user.user_id });
 
-    const employee = await employeeModel.findOne({userId:session.userId})  ;  
-
-    if(!employee){
-        return res.status(404).json({success:false , message:"User Not Found"}) ; 
-    }
-
-    if(!employee.isDeleted){
-        return res.json({success:false , message:"Your account us desactivated , You can not do this action"}) ; 
-    }
-    const today = new Date() ; 
-    today.setHoures(0,0,0,0);
-    const existing = await Attendance.findOne({
-        employeeId:employee._id , 
-        date:today
-    }) ;  
-
-    const now = new Date() ; 
-
-    if(!existing){
-        const isLate = now.getHours() > 0 && now.getMinutes() > 0  ; 
-        const attendance = await Attendance.create({
-            employeeId:employee._id,
-            date:now , 
-            checkIn:now , 
-            status:isLate ? "LATE" : "PRESENT"
-        })
-        return res.json({success:true , type:"CHECK_IN" , message:data}); 
-    }else if(!existing.checkOut) {
-        const checkInTime = new Date(existing.checkIn).getTime() ; 
-        const deffMs = now.getTime() - checkInTime ; 
-        const diffHours = deffMs / (1000 * 60 * 60) ; 
-        
-        existing.checkOut = now ; 
-
-        const workingHoures = parseFloat(diffHours.toFixed(2)) ; 
-
-        let dayType = "Short Day" ; 
-        if(workingHoures >= 8) dayType = "Full Day" ; 
-        else if(workingHoures >= 6) dayType = "Three Quarters Day"
-        else if(workingHoures >= 4) dayType = "Half Day" 
-
-        existing.dayType = dayType ; 
-        existing.workingHoures = workingHoures ;   
-
-
-        return res.json({success:true , message:attendance}) ; 
-    }
-    } catch (error) {
-        return res.json({success:false , message:error.message}) ;    
-    }
-} 
-
-export const getAttendance = async (req , res) => {
-    try{
-        const session = req.session ; 
-        const employee = await employeeModel.findOne({userId:session.userId})  ;    
-        if(!employee) {
-            return res.status(404).json({success:false , message:"User Not Found"})
+        if (!employee) {
+            return res.status(404).json({ success: false, message: "User not found" });
         }
-        const limit = req.query.limit || 30  ;
-        const history = Attendance.find({employeeId:employee._id}).sort({date:-1}).limit(limit) ; 
 
-        return res.status(201).json({success:false , data:history , employee:{isDeleted:employee.isDeleted}}) ; 
+        if (employee.isDeleted) {
+            return res
+                .status(403)
+                .json({ success: false, message: "Your account is deactivated, you cannot do this action" });
+        }
 
-    }catch(error){
-        return res.status(500).message({success:false , message:error.message})
+        const now = new Date();
+        const today = new Date(now);
+        today.setHours(0, 0, 0, 0);
+
+        const existing = await Attendance.findOne({ employeeId: employee._id, date: today });
+
+        // ---- Check-in ----
+        if (!existing) {
+            const isLate =
+                now.getHours() > WORK_START_HOUR ||
+                (now.getHours() === WORK_START_HOUR && now.getMinutes() > WORK_START_MINUTE);
+
+            const attendance = await Attendance.create({
+                employeeId: employee._id,
+                date: today,
+                checkIn: now,
+                status: isLate ? "LATE" : "PRESENT",
+            });
+            return res.status(201).json({ success: true, type: "CHECK_IN", data: attendance });
+        }
+
+        // ---- Check-out ----
+        if (!existing.checkOut) {
+            const diffHours = (now.getTime() - new Date(existing.checkIn).getTime()) / (1000 * 60 * 60);
+            const workingHours = parseFloat(diffHours.toFixed(2));
+
+            let dayType = "Short Day";
+            if (workingHours >= 8) dayType = "Full Day";
+            else if (workingHours >= 6) dayType = "Three Quarters Day";
+            else if (workingHours >= 4) dayType = "Half Day";
+
+            existing.checkOut = now;
+            existing.workingHours = workingHours;
+            existing.dayType = dayType;
+            await existing.save();
+
+            return res.json({ success: true, type: "CHECK_OUT", data: existing });
+        }
+
+        // ---- Already checked in and out today ----
+        return res
+            .status(400)
+            .json({ success: false, message: "You have already checked in and out today" });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
     }
-}
+};
+
+// GET /api/attendances?limit=30
+export const getAttendance = async (req, res) => {
+    try {
+        const employee = await employeeModel.findOne({ userId: req.user.user_id });
+        if (!employee) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
+
+        const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 30, 1), 365);
+        const history = await Attendance.find({ employeeId: employee._id })
+            .sort({ date: -1 })
+            .limit(limit);
+
+        return res.json({
+            success: true,
+            data: history,
+            employee: { isDeleted: employee.isDeleted },
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};

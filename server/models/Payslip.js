@@ -19,6 +19,9 @@ const payslipSchema = new mongoose.Schema(
   }
 );
 
+// One payslip per employee per month
+payslipSchema.index({ employeeId: 1, month: 1, year: 1 }, { unique: true });
+
 const Payslip = mongoose.models.Payslip || mongoose.model("Payslip", payslipSchema);
 
 export default Payslip;

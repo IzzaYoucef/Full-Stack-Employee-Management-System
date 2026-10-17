@@ -1,11 +1,12 @@
-import express from "express";
-import { createLeave, getLeaves, getAllLeaves, updateLeaveStatus } from "../controllers/leaveController.js";
+import { Router } from "express";
+import { createLeave, getLeaves, getAllLeaves, updateLeaveStatus } from "../controlers/LeaveController.js";
+import { protect, protectAdmin } from "../middleware/authMiddleware.js";
 
-const leaveRouter = express.Router();
+const leaveRouter = Router();
 
-leaveRouter.post("/", createLeave);
-leaveRouter.get("/", getLeaves);                    // mes demandes (employé)
-leaveRouter.get("/all", getAllLeaves);              // toutes les demandes (admin)
-leaveRouter.patch("/:id/status", updateLeaveStatus); // approuver / rejeter (admin)
+leaveRouter.post("/", protect, createLeave);
+leaveRouter.get("/", protect, getLeaves); // my requests (employee)
+leaveRouter.get("/all", protect, protectAdmin, getAllLeaves); // all requests (admin)
+leaveRouter.patch("/:id/status", protect, protectAdmin, updateLeaveStatus); // approve / reject (admin)
 
 export default leaveRouter;
