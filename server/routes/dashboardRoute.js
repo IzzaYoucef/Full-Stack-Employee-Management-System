@@ -1,6 +1,6 @@
 import {Router}  from 'express'
-import { protect, protectAdmin } from '../middleware/authMiddleware';
-import { getDashboard } from '../controlers/dashboardController';
+import { protect, protectAdmin } from '../middleware/authMiddleware.js';
+import { getDashboard } from '../controlers/dashboardController.js';
 const dashboardRoute = Router() ;  
 
 dashboardRoute.get("/" , protect , protectAdmin , getDashboard) ; 
