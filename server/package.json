@@ -7,7 +7,7 @@
   "scripts": {
     "server": "nodemon server.js",
     "start": "node server.js",
-    "seed" : "node seed.js"
+    "seed": "node seed.js"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +19,8 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.10.0",
-    "multer": "^2.3.0"
+    "multer": "^2.3.0",
+    "nodemailer": "^10.1.7"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

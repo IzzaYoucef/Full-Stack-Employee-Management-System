@@ -9,7 +9,10 @@ import profileRouter from "./routes/profileRoute.js";
 import attendanceRouter from "./routes/attendancesRoute.js";
 import leaveRouter from "./routes/leavesRouter.js";
 import payslipRoute from "./routes/payslipsRoute.js";
-import dashboardRoute from "./routes/dashboardRoute.js";
+import dashboardRoute from "./routes/dashboardRoute.js"; 
+import { serve } from "inngest/express";
+import { inngest, functions } from "./inngest/inngest.js"; 
+
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -33,7 +36,12 @@ app.use("/api/profile", profileRouter);
 app.use("/api/attendances", attendanceRouter);
 app.use("/api/leave", leaveRouter);
 app.use("/api/payslips", payslipRoute); 
-app.use("/api/dashboard" , dashboardRoute);
+app.use("/api/dashboard" , dashboardRoute); 
+
+
+// Inngest
+app.use("/api/inngest", serve({ client: inngest, functions }));
+
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({ success: false, message: "Route not found" });
