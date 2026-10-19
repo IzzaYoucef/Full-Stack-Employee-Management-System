@@ -12,8 +12,11 @@ async function createAdmin() {
         console.error("ADMIN_EMAIL is missing in the .env file");
         process.exit(1);
     }
-    const password = "admin@sshkeygen"
-
+    const password = process.env.ADMIN_PASSWORD ; 
+    if(!password){
+        console.log("Password does not exist in .env file"); 
+        process.exit(1) ;  
+    } 
     let exitCode = 0;
 
     try {
