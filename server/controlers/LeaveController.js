@@ -1,5 +1,6 @@
 import Employee from "../models/Employee.js";
 import LeaveApplication from "../models/LeaveApplication.js";
+import { inngest } from "../inngest/inngest.js";
 
 // POST /api/leave
 export const createLeave = async (req, res) => {
@@ -49,6 +50,16 @@ export const createLeave = async (req, res) => {
       reason,
       status: "PENDING",
     });
+
+    // Start the background job (admin reminder after 24h). A failure here must not break the request.
+    try {
+      await inngest.send({
+        name: "leave/pending",
+        data: { leaveApplicationId: leave._id.toString() },
+      });
+    } catch (err) {
+      console.error("Inngest send failed (leave/pending):", err.message);
+    }
 
     return res.status(201).json({ success: true, data: leave });
   } catch (error) {

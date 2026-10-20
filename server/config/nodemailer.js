@@ -1,11 +1,13 @@
-import { createTransport } from "nodemailer";
+import nodemailer from "nodemailer";
+
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port:  587,
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false, // STARTTLS on port 587
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-}); 
+});
 
-export default transporter; 
+export default transporter;
