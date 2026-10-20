@@ -1,5 +1,6 @@
 import Attendance from "../models/Attendances.js";
 import employeeModel from "../models/Employee.js";
+import { inngest } from "../inngest/inngest.js";
 
 // An employee arriving after this time is marked LATE
 const WORK_START_HOUR = 9;
@@ -38,6 +39,17 @@ export const clockInOut = async (req, res) => {
                 checkIn: now,
                 status: isLate ? "LATE" : "PRESENT",
             });
+
+            // Start the background job (check-out reminder). A failure here must not break the check-in.
+            try {
+                await inngest.send({
+                    name: "employee/check-in",
+                    data: { employeeId: employee._id.toString(), attendanceId: attendance._id.toString() },
+                });
+            } catch (err) {
+                console.error("Inngest send failed (employee/check-in):", err.message);
+            }
+
             return res.status(201).json({ success: true, type: "CHECK_IN", data: attendance });
         }
 
