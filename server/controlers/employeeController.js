@@ -1,6 +1,6 @@
 import Employee from "../models/Employee.js";
 import userModel from "../models/User.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const ROLES = ["ADMIN", "EMPLOYEE"];
 
