@@ -51,7 +51,7 @@ app.use("/api/dashboard", dashboardRoute);
 
 // 404 handler
 app.use((req, res) => {
-    res.status(404).json({ success: false, message: "Route not found" });
+    res.status(404).json({ success: false, message: "Route not found"});
 });
 
 // Global error handler (malformed JSON, multer errors, ...)
