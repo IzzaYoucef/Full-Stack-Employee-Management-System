@@ -21,6 +21,7 @@ app.use(cors());
 app.use(express.json());
 app.use(multer().none()); // parses multipart/form-data text fields
 
+await connectDb();
 app.get("/", (req, res) => {
     res.send("SERVER RUNNING");
 });
@@ -29,18 +30,8 @@ app.get("/", (req, res) => {
 // must not depend on the database, and each function connects by itself when it needs to.
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
-// Make sure the database is connected before any API route runs.
-// (The connection is cached, so this is free after the first request.)
-app.use("/api", async (req, res, next) => {
-    try {
-        await connectDb();
-        next();
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Database connection failed" });
-    }
-});
-
-// Routes
+// Routes 
+app.get("/favicon.ico", (req, res) => res.status(204).end());
 app.use("/api/auth", authRouter);
 app.use("/api/employees", employeeRouter);
 app.use("/api/profile", profileRouter);
