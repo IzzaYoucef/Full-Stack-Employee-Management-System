@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { dummyProfileData } from '../assets/assets'
+import api from '../api/axios'
 
 const adminNavItems = [
   { label: "Dashboard", icon: LayoutDashboardIcon, to: "/dashboard" },
@@ -38,14 +38,18 @@ const SideBar = () => {
   const navigate = useNavigate()
   const [name, setName] = useState("")
   const [userName, setUserName] = useState("")
-  const [role, setRole] = useState("Admin")
+  const role = localStorage.getItem("role") === "EMPLOYEE" ? "Employee" : "Admin"
 
   useEffect(() => {
-    setTimeout(()=>{
-      setName(dummyProfileData.firstName + " " + dummyProfileData.lastName)
-      setUserName(dummyProfileData.firstName)
-      setRole("Admin")
-    },1000)
+    api.get("/profile")
+      .then(({ data }) => {
+        setName(data.data.firstName + " " + data.data.lastName)
+        setUserName(data.data.firstName)
+      })
+      .catch(() => { // the admin account has no employee profile
+        setName("Admin")
+        setUserName("Admin")
+      })
   }, [])
 
   useEffect(() => {
@@ -111,7 +115,7 @@ const SideBar = () => {
 
       <button
         type="button"
-        onClick={() => navigate("/login")}
+        onClick={() => { localStorage.clear(); navigate("/login") }}
         className="mt-8 flex items-center justify-center gap-2 cursor-pointer text-sm font-semibold text-white"
       >
         <LogOutIcon size={18} />

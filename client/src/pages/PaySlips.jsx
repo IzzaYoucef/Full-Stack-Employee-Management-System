@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { dummyPayslipData } from '../assets/assets'
+import api from '../api/axios'
+import toast from 'react-hot-toast'
 import { DownloadIcon, PlusIcon } from 'lucide-react' 
 import { useNavigate } from 'react-router-dom'
 import Loading from '../components/Loading'
@@ -10,10 +11,13 @@ const PaySlips = () => {
   const navigate = useNavigate() ; 
   const fetchPaySlips = useCallback(async () => {
     setLoading(true)
-    setPaySlips(dummyPayslipData)
-    setTimeout(() => {
-      setLoading(false)
-    }, 500)
+    try {
+      const { data } = await api.get('/payslips')
+      setPaySlips(data.data)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Something went wrong')
+    }
+    setLoading(false)
   }, [])
 
   useEffect(() => { 

@@ -5,9 +5,9 @@ import { Link } from 'react-router-dom'
 const EmployeeDahboard = ({ data }) => {
 
   const cardItems = [
-    { title: "Days Present", icon: CalendarCheck, number: 50 },
-    { title: "Pending Leaves", icon: CalendarX, number: 40 },
-    { title: "Latest Payslip", icon: DollarSign, number: 2500 },
+    { title: "Days Present", icon: CalendarCheck, number: data.currentMonthAttendance },
+    { title: "Pending Leaves", icon: CalendarX, number: data.pendingLeaves },
+    { title: "Latest Payslip", icon: DollarSign, number: data.latestPayslip?.netSalary ?? 0 },
   ] 
 
 

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { dummyEmployeeData } from '../assets/assets'
+import api from '../api/axios'
+import toast from 'react-hot-toast'
 import { PlusIcon, SearchIcon } from 'lucide-react'
 import Loading from '../components/Loading'
 
@@ -11,12 +12,38 @@ const Employees = () => {
 
   const fetchEmployeesData = useCallback(async () => {
     setLoading(true)
-    setEmployees(dummyEmployeeData) 
-    setFiltredEmployees(dummyEmployeeData);
-    setTimeout(() => {
-      setLoading(false)
-    }, 500)
+    try {
+      const { data } = await api.get('/employees')
+      setEmployees(data.data)
+      setFiltredEmployees(data.data)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Something went wrong')
+    }
+    setLoading(false)
   }, []) 
+
+  const DEPARTMENTS = ["Engineering", "Human Resources", "Marketing", "Sales", "Finance", "Operations", "IT Support", "Customer Success", "Product Management", "Design"]
+  const emptyForm = { firstName: '', lastName: '', email: '', password: '', phone: '', position: '', department: 'Engineering', basicSalary: '', allowances: '', deductions: '', joinDate: '' }
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState(emptyForm)
+  const [saving, setSaving] = useState(false)
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+
+  const handleAddEmployee = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    try {
+      await api.post('/employees', form)
+      toast.success('Employee created')
+      setShowForm(false)
+      setForm(emptyForm)
+      fetchEmployeesData()
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Something went wrong')
+    }
+    setSaving(false)
+  }
 
   const handleInputSearch = (e) => {
     const query = e.target.value.toLowerCase()
@@ -46,6 +73,7 @@ const Employees = () => {
         </div>
         <button
           type="button"
+          onClick={() => setShowForm(true)}
           className='flex items-center gap-2 px-2 h-10 rounded-md bg-[#4F39F6] text-white cursor-pointer'
         >
           <PlusIcon color='white' size={16} />
@@ -88,6 +116,40 @@ const Employees = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/** Add Employee form */}
+      {showForm && (
+        <div className='fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50'>
+          <form onSubmit={handleAddEmployee} className='bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto grid gap-3'>
+            <h2 className='text-lg font-medium'>Add Employee</h2>
+            <div className='grid grid-cols-2 gap-3'>
+              <input name='firstName' value={form.firstName} onChange={handleChange} placeholder='First name' required className='border border-gray-300 rounded-md px-3 py-2' />
+              <input name='lastName' value={form.lastName} onChange={handleChange} placeholder='Last name' required className='border border-gray-300 rounded-md px-3 py-2' />
+            </div>
+            <input name='email' type='email' value={form.email} onChange={handleChange} placeholder='Email' required className='border border-gray-300 rounded-md px-3 py-2' />
+            <input name='password' type='password' value={form.password} onChange={handleChange} placeholder='Password (min 6 characters)' minLength={6} required className='border border-gray-300 rounded-md px-3 py-2' />
+            <div className='grid grid-cols-2 gap-3'>
+              <input name='phone' value={form.phone} onChange={handleChange} placeholder='Phone' required className='border border-gray-300 rounded-md px-3 py-2' />
+              <input name='position' value={form.position} onChange={handleChange} placeholder='Position' required className='border border-gray-300 rounded-md px-3 py-2' />
+            </div>
+            <div className='grid grid-cols-2 gap-3'>
+              <select name='department' value={form.department} onChange={handleChange} className='border border-gray-300 rounded-md px-3 py-2'>
+                {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <input name='joinDate' type='date' value={form.joinDate} onChange={handleChange} className='border border-gray-300 rounded-md px-3 py-2' />
+            </div>
+            <div className='grid grid-cols-3 gap-3'>
+              <input name='basicSalary' type='number' min='0' value={form.basicSalary} onChange={handleChange} placeholder='Basic salary' className='border border-gray-300 rounded-md px-3 py-2' />
+              <input name='allowances' type='number' min='0' value={form.allowances} onChange={handleChange} placeholder='Allowances' className='border border-gray-300 rounded-md px-3 py-2' />
+              <input name='deductions' type='number' min='0' value={form.deductions} onChange={handleChange} placeholder='Deductions' className='border border-gray-300 rounded-md px-3 py-2' />
+            </div>
+            <div className='flex justify-end gap-2 mt-2'>
+              <button type='button' onClick={() => setShowForm(false)} className='px-4 py-2 rounded-md border border-gray-300'>Cancel</button>
+              <button type='submit' disabled={saving} className='px-4 py-2 rounded-md bg-[#4F39F6] text-white disabled:opacity-60'>{saving ? 'Saving...' : 'Create'}</button>
+            </div>
+          </form>
         </div>
       )}
     </div>

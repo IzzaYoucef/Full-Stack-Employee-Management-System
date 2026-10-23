@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { dummyAttendanceData } from '../assets/assets'
+import { getWorkingHoursDisplay } from '../assets/assets'
+import api from '../api/axios'
+import toast from 'react-hot-toast'
 import { Calendar1Icon, TimerIcon } from 'lucide-react'
 import Loading from '../components/Loading'
 
@@ -8,18 +10,24 @@ const Attendance = () => {
   const [attendances, setAttendances] = useState([])
   const [loading, setLoading] = useState(true)
 
+  const worked = attendances.filter((a) => a.workingHours != null)
   const cardItems = [
-    { title: "Days present", icon: Calendar1Icon, number: 2 },
-    { title: "Late Arrivals", icon: TimerIcon, number: 0 },
-    { title: "Average work hours", icon: Calendar1Icon, number: 8.5 },
+    { title: "Days present", icon: Calendar1Icon, number: attendances.length },
+    { title: "Late Arrivals", icon: TimerIcon, number: attendances.filter((a) => a.status === "LATE").length },
+    { title: "Average work hours", icon: Calendar1Icon, number: worked.length ? (worked.reduce((sum, a) => sum + a.workingHours, 0) / worked.length).toFixed(1) : 0 },
   ]
+
+  const time = (d) => (d ? new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—')
 
   const fetchAttendance = useCallback(async () => {
     setLoading(true)
-    setAttendances(dummyAttendanceData)
-    setTimeout(() => {
-      setLoading(false)
-    }, 500)
+    try {
+      const { data } = await api.get('/attendances')
+      setAttendances(data.data)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Something went wrong')
+    }
+    setLoading(false)
   }, [])
 
   useEffect(() => {
@@ -72,14 +80,14 @@ const Attendance = () => {
         ) : (
           attendances.map((a, index) => (
             <div
-              key={a.id ?? index}
+              key={a._id ?? index}
               className='grid grid-cols-6 gap-2 items-center py-2 border-t border-gray-100 text-sm'
             >
-              <p className='font-medium'>{a.date}</p>
-              <p>{a.checkIn}</p>
-              <p>{a.checkOut}</p>
-              <p>{a.workingHours}</p>
-              <p className='px-2 py-1 rounded text-[#007A55] uppercase bg-[#ECFDF5] text-xs w-fit'>{a.dayType}</p>
+              <p className='font-medium'>{new Date(a.date).toLocaleDateString()}</p>
+              <p>{time(a.checkIn)}</p>
+              <p>{time(a.checkOut)}</p>
+              <p>{getWorkingHoursDisplay(a)}</p>
+              <p className='px-2 py-1 rounded text-[#007A55] uppercase bg-[#ECFDF5] text-xs w-fit'>{a.dayType ?? '—'}</p>
               <p className='px-2 py-1 rounded text-[#007A55] uppercase bg-[#ECFDF5] text-xs w-fit'>{a.status}</p>
             </div>
           ))

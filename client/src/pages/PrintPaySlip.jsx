@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
-import { dummyPayslipData } from '../assets/assets';
+import api from '../api/axios';
+import toast from 'react-hot-toast';
 import Loading from '../components/Loading';
 import { Printer } from 'lucide-react';
 
@@ -13,18 +14,18 @@ const PrintPaySlip = () => {
   useEffect(() => {
     setLoading(true);
 
-    const foundSlip = dummyPayslipData.find((slip) => slip._id === id);
-    setPayslip(foundSlip ?? {});
-
-    setTableContent([
-      { key: 'Basic Salary', value: `$${foundSlip?.basicSalary ?? 0}` },
-      { key: 'Allowances', value: `+$${foundSlip?.allowances ?? 0}` },
-      { key: 'Deductions', value: `-$${foundSlip?.deductions ?? 0}` },
-    ]);
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    api.get(`/payslips/${id}`)
+      .then(({ data }) => {
+        const foundSlip = data.data;
+        setPayslip(foundSlip);
+        setTableContent([
+          { key: 'Basic Salary', value: `$${foundSlip.basicSalary ?? 0}` },
+          { key: 'Allowances', value: `+$${foundSlip.allowances ?? 0}` },
+          { key: 'Deductions', value: `-$${foundSlip.deductions ?? 0}` },
+        ]);
+      })
+      .catch((err) => toast.error(err.response?.data?.message || 'Something went wrong'))
+      .finally(() => setLoading(false));
   }, [id]);
 
   if (loading) {
