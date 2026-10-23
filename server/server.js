@@ -21,7 +21,13 @@ app.use(cors());
 app.use(express.json());
 app.use(multer().none()); // parses multipart/form-data text fields
 
-await connectDb();
+try {
+    await connectDb();
+} catch (e) {
+    console.error("\n>>> Cannot reach MongoDB: " + e.message);
+    console.error(">>> Check MONGODB_URI in server/.env, your internet, and that your IP is allowed in MongoDB Atlas > Network Access.\n");
+    process.exit(1);
+}
 app.get("/", (req, res) => {
     res.send("SERVER RUNNING");
 });

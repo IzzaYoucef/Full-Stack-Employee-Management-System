@@ -16,4 +16,17 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// If the token is missing/expired/invalid, clear it and go back to the login page
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    const isLogin = err.config?.url?.includes("/auth/login");
+    if (err.response?.status === 401 && !isLogin) {
+      localStorage.clear();
+      window.location.href = "/login";
+    }
+    return Promise.reject(err);
+  }
+);
+
 export default api;

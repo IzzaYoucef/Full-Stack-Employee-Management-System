@@ -5,10 +5,10 @@ import { DEPARTMENTS } from '../assets/assets'
 const AdminDashboard = ({ data }) => {
 
   const cardItems = [
-    { title: "Total Employees", icon: UsersIcon, number: 50 },
-    { title: "Departements", icon: Building2Icon, number: 2},
-    { title: "Today's attendance", icon: CalendarRangeIcon, number: 2 }, 
-    { title: "Pending Leaves", icon: PaperclipIcon , number: 2 }, 
+    { title: "Total Employees", icon: UsersIcon, number: data.totalEmployees },
+    { title: "Departements", icon: Building2Icon, number: DEPARTMENTS.length },
+    { title: "Today's attendance", icon: CalendarRangeIcon, number: data.todayAttendances }, 
+    { title: "Pending Leaves", icon: PaperclipIcon , number: data.pendingLeaves }, 
   ]
 
   return (

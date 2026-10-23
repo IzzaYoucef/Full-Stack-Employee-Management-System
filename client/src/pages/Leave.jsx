@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { dummyLeaveData } from '../assets/assets'
+import api from '../api/axios'
+import toast from 'react-hot-toast'
 import { PlusIcon, ThermometerIcon, TreePalmIcon, UmbrellaIcon, Check, X } from 'lucide-react'
 import Loading from '../components/Loading'
 
@@ -20,6 +21,7 @@ const formatDateRange = (start, end) => {
 }
 
 const Leave = () => {
+  const isAdmin = localStorage.getItem('role') === 'ADMIN'
 
   const [leaves, setLeaves] = useState([])
   const [loading, setLoading] = useState(true)
@@ -32,25 +34,31 @@ const Leave = () => {
 
   const fetchEmployeeLeave = useCallback(async () => {
     setLoading(true)
-    setLeaves(dummyLeaveData)
-    setTimeout(() => {
-      setLoading(false)
-    }, 500)
+    try {
+      // admin sees every request, employee only his own
+      const { data } = await api.get(isAdmin ? '/leave/all' : '/leave')
+      setLeaves(data.data)
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Something went wrong')
+    }
+    setLoading(false)
   }, [])
 
   useEffect(() => {
     fetchEmployeeLeave()
   }, [fetchEmployeeLeave])
 
-  // Update one leave's status locally. Swap the body for a real
-  // API call (e.g. PATCH /api/leaves/:id) once the backend exists.
-  const handleApprove = (id) => {
-   setLeaves(prev => prev.map(l => l.id === id ? {...l , status:"APROUVED"} : l))
+  const updateStatus = async (id, status) => {
+    try {
+      await api.patch(`/leave/${id}/status`, { status })
+      setLeaves(prev => prev.map(l => l._id === id ? { ...l, status } : l))
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Something went wrong')
+    }
   }
 
-  const handleReject = (id) => {
-    setLeaves(prev => prev.map(l => l.id === id ? { ...l, status: "REJECTED" } : l))
-  }
+  const handleApprove = (id) => updateStatus(id, "APPROVED")
+  const handleReject = (id) => updateStatus(id, "REJECTED")
 
   return (
     <div className='mx-5 my-7'>
@@ -104,7 +112,7 @@ const Leave = () => {
         ) : (
           leaves.map((l) => (
             <div
-              key={l.id}
+              key={l._id}
               className='grid grid-cols-5 gap-4 items-center py-2 border-t border-gray-100 text-sm'
             >
               <p className='font-medium'>{toTitleCase(l.type)}</p>
@@ -116,11 +124,11 @@ const Leave = () => {
                   {toTitleCase(l.status)}
                 </p>
 
-                {l.status === "PENDING" && (
+                {isAdmin && l.status === "PENDING" && (
                   <div className="flex items-center mx-40">
                     <button
                       type="button"
-                      onClick={() => handleApprove(l.id)}
+                      onClick={() => handleApprove(l._id)}
                       className="p-1 rounded-full hover:bg-green-50 text-green-600 cursor-pointer "
                       aria-label="Approve leave"
                     >
@@ -128,7 +136,7 @@ const Leave = () => {
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleReject(l.id)}
+                      onClick={() => handleReject(l._id)}
                       className="p-1 rounded-full hover:bg-red-50 text-red-600 cursor-pointer"
                       aria-label="Reject leave"
                     >

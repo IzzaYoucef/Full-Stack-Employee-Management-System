@@ -24,8 +24,12 @@ async function createAdmin() {
 
         const existingAdmin = await userModel.findOne({ email: adminEmail });
         if (existingAdmin) {
-            console.log("An account with this email already exists, nothing to do");
-            return;                                          
+            // Account already exists: reset its password to ADMIN_PASSWORD from .env and make sure it is ADMIN
+            existingAdmin.password = await bcrypt.hash(password, 10);
+            existingAdmin.role = "ADMIN";
+            await existingAdmin.save();
+            console.log("Admin already existed: password reset to ADMIN_PASSWORD from .env");
+            return;
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);

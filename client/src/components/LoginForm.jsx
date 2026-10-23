@@ -1,17 +1,28 @@
 import React, { useState } from 'react'
 import LoginLeftSide from './LoginLeftSide'
 import { ArrowLeftIcon, EyeClosedIcon, EyeIcon } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import api from '../api/axios'
 
 const LoginForm = ({ role, title, subtitle }) => {
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log({ role, email, password }) // replace with real auth call
+    try {
+      const { data } = await api.post('/auth/login', { email, password, user_role: role })
+      localStorage.setItem('token', data.data.token)
+      localStorage.setItem('role', data.data.role)
+      localStorage.setItem('email', data.data.email)
+      navigate('/dashboard')
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Something went wrong')
+    }
   }
 
   return (

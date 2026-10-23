@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { dummyProfileData } from '../assets/assets';
+import api from '../api/axios';
+import toast from 'react-hot-toast';
 import Loading from '../components/Loading'
 import { Save, Lock } from 'lucide-react' 
 import ChangePassword from '../components/ChangePassword';
@@ -11,10 +12,9 @@ const Settings = () => {
 
   const handleChanges = (e) => {
     e.preventDefault();
-    console.log('Saving changes:', {
-      position: employeeData.position,
-      bio: employeeData.bio,
-    });
+    api.post('/profile', { bio: employeeData.bio })
+      .then(() => toast.success('Profile updated'))
+      .catch((err) => toast.error(err.response?.data?.message || 'Something went wrong'));
   };
 
   const handleFieldChange = (e) => {
@@ -24,10 +24,14 @@ const Settings = () => {
 
   const fetchProfileData = async () => {
     setLoading(true);
-    setEmployeeData(dummyProfileData);
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
+    try {
+      const { data } = await api.get('/profile');
+      setEmployeeData(data.data);
+    } catch (err) {
+      // the admin account has no employee profile
+      setEmployeeData({ email: localStorage.getItem('email') });
+    }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -127,8 +131,14 @@ const Settings = () => {
           <ChangePassword
             isOpen={showPasswordPage}
             onClose={() => setShowPasswordPage(false)}
-            onSubmit={({ currentPassword, newPassword }) => {
-              setShowPasswordPage(false)
+            onSubmit={async ({ currentPassword, newPassword }) => {
+              try {
+                await api.post('/auth/change-password', { currentPassword, newPassword })
+                toast.success('Password updated')
+                setShowPasswordPage(false)
+              } catch (err) {
+                toast.error(err.response?.data?.message || 'Something went wrong')
+              }
             }}
           />
         </>
