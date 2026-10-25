@@ -54,7 +54,7 @@ const Attendance = () => {
   return (
     <div className='mx-5 my-7'>
       {/** Page Header */}
-      <div className='w-full flex justify-between mb-6'>
+      <div className='w-full flex flex-wrap items-start justify-between gap-3 mb-6'>
         <div className='grid gap-2'>
           <h1 className='text-2xl font-medium'>Attendance</h1>
           <p className='text-base font-normal text-[#62748E]'>Track your attendance record</p>
@@ -73,7 +73,7 @@ const Attendance = () => {
       </div>
 
       {/** Cards */}
-      <div className='flex gap-3 mb-6'>
+      <div className='grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6'>
         {cardItems.map((item) => (
           <div
             key={item.title}
@@ -94,6 +94,8 @@ const Attendance = () => {
       <div className="border border-gray-200 rounded-lg p-4">
         <h1 className='font-medium text-lg mb-3'>Recent Activity</h1>
 
+        <div className='overflow-x-auto'>
+        <div className='min-w-[640px]'>
         <div className="grid grid-cols-6 gap-2 pb-2 mb-2 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase">
           <p>Date</p>
           <p>Check In</p>
@@ -120,6 +122,8 @@ const Attendance = () => {
             </div>
           ))
         )}
+        </div>
+        </div>
       </div>
     </div>
   )

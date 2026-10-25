@@ -66,7 +66,7 @@ const Employees = () => {
   return (
     <div className='mx-5 my-7'>
       {/** Header */}
-      <div className='w-full flex justify-between mb-6'>
+      <div className='w-full flex flex-wrap items-start justify-between gap-3 mb-6'>
         <div className='grid gap-2'>
           <h1 className='text-2xl font-medium'>Employees</h1>
           <p className='text-base font-normal text-[#62748E]'>Manage your team members</p>
@@ -96,11 +96,11 @@ const Employees = () => {
       {loading ? (
         <Loading />
       ) : (
-        <div className='flex flex-wrap gap-4'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
           {filtredEmployees.map((em) => (
             <div
               key={em.id ?? `${em.firstName}-${em.lastName}`}
-              className='flex-1 w-56 p-4 rounded-lg border border-gray-200 bg-white'
+              className='p-4 rounded-lg border border-gray-200 bg-white'
             >
               <header className='text-sm text-gray-500 mb-3'>
                 {em.position}
@@ -124,23 +124,23 @@ const Employees = () => {
         <div className='fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50'>
           <form onSubmit={handleAddEmployee} className='bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto grid gap-3'>
             <h2 className='text-lg font-medium'>Add Employee</h2>
-            <div className='grid grid-cols-2 gap-3'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
               <input name='firstName' value={form.firstName} onChange={handleChange} placeholder='First name' required className='border border-gray-300 rounded-md px-3 py-2' />
               <input name='lastName' value={form.lastName} onChange={handleChange} placeholder='Last name' required className='border border-gray-300 rounded-md px-3 py-2' />
             </div>
             <input name='email' type='email' value={form.email} onChange={handleChange} placeholder='Email' required className='border border-gray-300 rounded-md px-3 py-2' />
             <input name='password' type='password' value={form.password} onChange={handleChange} placeholder='Password (min 6 characters)' minLength={6} required className='border border-gray-300 rounded-md px-3 py-2' />
-            <div className='grid grid-cols-2 gap-3'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
               <input name='phone' value={form.phone} onChange={handleChange} placeholder='Phone' required className='border border-gray-300 rounded-md px-3 py-2' />
               <input name='position' value={form.position} onChange={handleChange} placeholder='Position' required className='border border-gray-300 rounded-md px-3 py-2' />
             </div>
-            <div className='grid grid-cols-2 gap-3'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
               <select name='department' value={form.department} onChange={handleChange} className='border border-gray-300 rounded-md px-3 py-2'>
                 {DEPARTMENTS.map((d) => <option key={d} value={d}>{d}</option>)}
               </select>
               <input name='joinDate' type='date' value={form.joinDate} onChange={handleChange} className='border border-gray-300 rounded-md px-3 py-2' />
             </div>
-            <div className='grid grid-cols-3 gap-3'>
+            <div className='grid grid-cols-1 sm:grid-cols-3 gap-3'>
               <input name='basicSalary' type='number' min='0' value={form.basicSalary} onChange={handleChange} placeholder='Basic salary' className='border border-gray-300 rounded-md px-3 py-2' />
               <input name='allowances' type='number' min='0' value={form.allowances} onChange={handleChange} placeholder='Allowances' className='border border-gray-300 rounded-md px-3 py-2' />
               <input name='deductions' type='number' min='0' value={form.deductions} onChange={handleChange} placeholder='Deductions' className='border border-gray-300 rounded-md px-3 py-2' />

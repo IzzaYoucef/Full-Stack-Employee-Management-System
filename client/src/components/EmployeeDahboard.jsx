@@ -13,11 +13,11 @@ const EmployeeDahboard = ({ data }) => {
 
   return (
     <div className='gap-3'>
-      <div className='flex gap-3 fit-content '>
+      <div className='grid grid-cols-1 sm:grid-cols-3 gap-3'>
         {cardItems.map((item) => (
           <div
             key={item.title}
-            className='flex flex-1 justify-between items-center p-6 border shadow border-gray-200 border-l-4 border-l-[#62748EB2] rounded-lg w-50'
+            className='flex flex-1 justify-between items-center p-6 border shadow border-gray-200 border-l-4 border-l-[#62748EB2] rounded-lg'
           >
             <div className='flex flex-col gap-1'>
               <p className='font-medium text-sm text-[#314158]'>{item.title}</p>
@@ -30,7 +30,7 @@ const EmployeeDahboard = ({ data }) => {
          ))}
       </div>
 
-      <div className='flex  gap-3 mt-9'>
+      <div className='flex flex-wrap gap-3 mt-9'>
         <Link
           to="/attendance"
           className='flex justify-between items-center gap-2 cursor-pointer bg-[#0000FF] border rounded-md px-5 py-2.5'
