@@ -1,3 +1,4 @@
+
 # Employee Management System
 
 A full-stack web app that helps a small company keep track of its people: who works there, who showed up today, who asked for time off, and who got paid what.
