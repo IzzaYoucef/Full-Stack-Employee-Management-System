@@ -43,7 +43,7 @@ const Settings = () => {
   return (
     <div className='mx-5 my-7'>
       {/* Page Header */}
-      <div className='w-full flex justify-between mb-6'>
+      <div className='w-full flex flex-wrap items-start justify-between gap-3 mb-6'>
         <div className='grid gap-2'>
           <h1 className='text-2xl font-medium'>Settings</h1>
           <p className='text-base font-normal text-[#62748E]'>Manage your account and preferences</p>
@@ -52,8 +52,8 @@ const Settings = () => {
 
       {loading ? <Loading /> : (
         <>
-          <form onSubmit={handleChanges} className='p-6 flex flex-col gap-5 items-start border border-gray-400'>
-            <div className='flex w-full gap-6'>
+          <form onSubmit={handleChanges} className='p-4 sm:p-6 flex flex-col gap-5 items-start border border-gray-400'>
+            <div className='flex flex-col sm:flex-row w-full gap-4 sm:gap-6'>
               <div className='flex flex-1 min-w-0 gap-2 flex-col'>
                 <label htmlFor="fullName" className='text-sm font-medium'>Name</label>
                 <input
@@ -115,7 +115,7 @@ const Settings = () => {
               <p className='text-gray-500'>The administrator account has no employee profile. You can still change your password below.</p>
             )}
 
-            <div className='mt-4 border border-gray-400 p-3 rounded flex justify-between  w-full'>
+            <div className='mt-4 border border-gray-400 p-3 rounded flex flex-wrap items-center justify-between gap-3 w-full'>
               <div className='flex gap-3'>
                 <div className='p-3 bg-[#F1F5F9]' >
                   <Lock />

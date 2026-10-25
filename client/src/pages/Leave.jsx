@@ -90,7 +90,7 @@ const Leave = () => {
   return (
     <div className='mx-5 my-7'>
       {/** Page Header */}
-      <div className='w-full flex justify-between mb-6'>
+      <div className='w-full flex flex-wrap items-start justify-between gap-3 mb-6'>
         <div className='grid gap-2'>
           <h1 className='text-2xl font-medium'>Leave Management</h1>
           <p className='text-base font-normal text-[#62748E]'>Your leave history and requests</p>
@@ -108,7 +108,7 @@ const Leave = () => {
       </div>
 
       {/** Cards */}
-      <div className='flex gap-3 mb-6'>
+      <div className='grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6'>
         {cardItems.map((item) => (
           <div
             key={item.title}
@@ -129,6 +129,8 @@ const Leave = () => {
       <div className="border border-gray-200 rounded-lg p-4">
         <h1 className='font-medium text-lg mb-3'>Recent Activity</h1>
 
+        <div className='overflow-x-auto'>
+        <div className='min-w-[640px]'>
         <div className="grid grid-cols-5 gap-2 pb-2 mb-2 border-b border-gray-200 text-xs font-medium text-gray-500 uppercase">
           <p>Type</p>
           <p>Dates</p>
@@ -154,8 +156,11 @@ const Leave = () => {
                   {toTitleCase(l.status)}
                 </p>
 
+              </div>
+
+              <div className="flex items-center gap-1">
                 {isAdmin && l.status === "PENDING" && (
-                  <div className="flex items-center mx-40">
+                  <>
                     <button
                       type="button"
                       onClick={() => handleApprove(l._id)}
@@ -172,25 +177,27 @@ const Leave = () => {
                     >
                       <X size={16} />
                     </button>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
           ))
         )}
+        </div>
+        </div>
       </div>
 
       {/** Apply Leave form */}
       {showForm && (
         <div className='fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50'>
-          <form onSubmit={handleApply} className='bg-white rounded-lg p-6 w-full max-w-md grid gap-3'>
+          <form onSubmit={handleApply} className='bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto grid gap-3'>
             <h2 className='text-lg font-medium'>Apply for Leave</h2>
             <select name='type' value={form.type} onChange={handleChange} className='border border-gray-300 rounded-md px-3 py-2'>
               <option value='SICK'>Sick Leave</option>
               <option value='CASUAL'>Casual Leave</option>
               <option value='ANNUAL'>Annual Leave</option>
             </select>
-            <div className='grid grid-cols-2 gap-3'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
               <div className='grid gap-1'>
                 <label className='text-sm text-gray-500'>From</label>
                 <input name='startDate' type='date' min={todayStr} value={form.startDate} onChange={handleChange} required className='border border-gray-300 rounded-md px-3 py-2' />

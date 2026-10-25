@@ -79,7 +79,7 @@ const PaySlips = () => {
   return (
     <div className='mx-5 my-7'>
       {/* Header */}
-      <div className='w-full flex justify-between mb-6'>
+      <div className='w-full flex flex-wrap items-start justify-between gap-3 mb-6'>
         <div className='grid gap-2'>
           <h1 className='text-2xl font-medium'>Payslips</h1>
           <p className='text-base font-normal text-[#62748E]'>{isAdmin ? 'All employees payslips' : 'Your payslip history'}</p>
@@ -99,7 +99,8 @@ const PaySlips = () => {
       {loading ? (
         <Loading />
       ) : (
-        <div className='border border-gray-200 rounded p-2'>
+        <div className='border border-gray-200 rounded p-2 overflow-x-auto'>
+         <div className='min-w-[560px]'>
           {/* Header row */}
           <div className='grid grid-cols-4 items-center'>
             {elementsToDisplay.map((element, index) => (
@@ -130,13 +131,14 @@ const PaySlips = () => {
               </button>
             </div> 
           ))}
+         </div>
         </div>
       )}
 
       {/* Create Payslip form (admin only) */}
       {isAdmin && showForm && (
         <div className='fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50'>
-          <form onSubmit={handleCreate} className='bg-white rounded-lg p-6 w-full max-w-md grid gap-3'>
+          <form onSubmit={handleCreate} className='bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto grid gap-3'>
             <h2 className='text-lg font-medium'>Create Payslip</h2>
             <select name='employeeId' value={form.employeeId} onChange={handleEmployee} required className='border border-gray-300 rounded-md px-3 py-2'>
               <option value=''>Select employee</option>
@@ -144,12 +146,12 @@ const PaySlips = () => {
                 <option key={emp.id} value={emp.id}>{emp.firstName} {emp.lastName}</option>
               ))}
             </select>
-            <div className='grid grid-cols-2 gap-3'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
               <input name='month' type='number' min='1' max='12' value={form.month} onChange={handleChange} placeholder='Month (1-12)' required className='border border-gray-300 rounded-md px-3 py-2' />
               <input name='year' type='number' min='2000' value={form.year} onChange={handleChange} placeholder='Year' required className='border border-gray-300 rounded-md px-3 py-2' />
             </div>
             <input name='basicSalary' type='number' min='0' value={form.basicSalary} onChange={handleChange} placeholder='Basic salary' required className='border border-gray-300 rounded-md px-3 py-2' />
-            <div className='grid grid-cols-2 gap-3'>
+            <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
               <input name='allowances' type='number' min='0' value={form.allowances} onChange={handleChange} placeholder='Allowances' className='border border-gray-300 rounded-md px-3 py-2' />
               <input name='deductions' type='number' min='0' value={form.deductions} onChange={handleChange} placeholder='Deductions' className='border border-gray-300 rounded-md px-3 py-2' />
             </div>

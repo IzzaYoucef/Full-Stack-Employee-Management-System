@@ -23,7 +23,7 @@ const LoginLanding = () => {
     <div className='flex min-h-screen'>
       <LoginLeftSide/>
       <div className='w-full md:w-1/2 flex flex-col items-center justify-center p-6 sm:p-12 lg:p-16 relative overflow-y-auto min-h-screen'>
-        <div className="main-content">
+        <div className="w-full max-w-md">
           <div className='mb-10'>
             <h1 className='text-4xl font-medium mb-2'>Welcome Back</h1>
             <p>Select your portal to securely access the system.</p>

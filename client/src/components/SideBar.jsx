@@ -126,25 +126,28 @@ const SideBar = () => {
 
   return (
     <>
-      <button
-        type="button"
-        className="md:hidden p-2 flex items-start"
-        onClick={() => setMobileShow(true)}
-        aria-label="Open menu"
-      >
-        <Menu size={22} />
-      </button>
+      <div className="md:hidden flex items-center gap-3 p-3 border-b border-slate-200 bg-white">
+        <button
+          type="button"
+          className="p-1 cursor-pointer"
+          onClick={() => setMobileShow(true)}
+          aria-label="Open menu"
+        >
+          <Menu size={22} />
+        </button>
+        <span className="font-semibold text-slate-800">Management System</span>
+      </div>
 
       {mobileShow && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileShow(false)} />
-          <aside className="relative h-screen w-64 bg-indigo-950 p-4">
+          <aside className="relative h-dvh w-64 max-w-[85%] overflow-y-auto bg-indigo-950 p-4">
             <SideBarContent isMobile />
           </aside>
         </div>
       )}
 
-      <aside className="hidden md:flex md:flex-col h-screen w-64 bg-indigo-950 p-4">
+      <aside className="hidden md:flex md:flex-col h-dvh w-64 shrink-0 bg-indigo-950 p-4">
         <SideBarContent isMobile={false} />
       </aside>
     </>

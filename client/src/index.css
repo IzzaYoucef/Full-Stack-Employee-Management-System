@@ -108,6 +108,15 @@
     }
 }
 
+/* phones: 16px inputs, otherwise iOS zooms the page when a field is focused */
+@media (max-width: 767px) {
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 6px;

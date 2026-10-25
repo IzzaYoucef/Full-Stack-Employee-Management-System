@@ -33,13 +33,13 @@ const PrintPaySlip = () => {
   }
 
   return (
-    <div className='w-full max-w-2xl mx-auto my-10 p-6 border border-gray-200 rounded text-center'>
+    <div className='w-[92%] max-w-2xl mx-auto my-6 sm:my-10 p-4 sm:p-6 border border-gray-200 rounded text-center'>
       <h1 className='capitalize text-lg font-bold'>Payslip</h1>
       <p className='uppercase text-gray-700 text-base font-semibold'>
         {payslip?.month}/{payslip?.year}
       </p>
 
-      <div className='flex justify-between items-center mt-5 mb-5'>
+      <div className='flex flex-wrap justify-between items-center gap-4 mt-5 mb-5'>
         <div>
           <p className='uppercase text-gray-700 text-base font-semibold'>Employee Name</p>
           <h1 className='text-lg font-bold'>
@@ -52,10 +52,10 @@ const PrintPaySlip = () => {
         </div>
       </div>
 
-      <div className='flex justify-between items-center mt-4'>
+      <div className='flex flex-wrap justify-between items-center gap-4 mt-4'>
         <div>
           <p className='uppercase text-gray-700 text-base font-semibold'>Email</p>
-          <h1 className='text-lg font-bold'>{payslip?.employee?.email}</h1>
+          <h1 className='text-lg font-bold break-all'>{payslip?.employee?.email}</h1>
         </div>
         <div>
           <p className='uppercase text-gray-700 text-base font-semibold'>Period</p>
