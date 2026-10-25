@@ -1,226 +1,166 @@
-# Full-Stack Employee Management System
 
-A full-stack web application for managing employees, built with React (Vite) on the frontend and Node.js/Express with MongoDB on the backend. It has separate Admin and Employee portals with JWT-based authentication, role-based access, and background jobs (reminders and automatic attendance handling) powered by Inngest.
+# Employee Management System
 
-## Features
+A full-stack web app that helps a small company keep track of its people: who works there, who showed up today, who asked for time off, and who got paid what.
 
-- **Admin and Employee portals** with role-based access (JWT)
-- **Employee management**: create, update, delete, filter by department
-- **Attendance**: check-in / check-out tracking
-- **Leave management**: employees apply, admins approve or reject
-- **Payslips**: generated from salary, allowances and deductions
-- **Background jobs (Inngest)**:
-  - Auto check-out reminder if an employee forgets to check out (after 9 hours), then the attendance is marked `LATE` after 10 hours
-  - Reminder email to the admin if a leave application is still `PENDING` after 24 hours
-  - Daily cron that reminds employees who haven't checked in
-- **Email notifications** with Nodemailer
+There are two sides to it:
 
-## Tech Stack
+- **Admins** manage the team. They add employees, approve or reject leave requests, and create payslips.
+- **Employees** look after their own stuff. They check in and out, ask for leave, read their payslips, and update their bio.
 
-**Frontend**
-- React (Vite)
-- React Router (`react-router-dom`)
-- Tailwind CSS
-- lucide-react (icons)
-- react-hot-toast (notifications)
+Built with React + Vite on the front, and Node, Express and MongoDB on the back.
 
-**Backend**
-- Node.js / Express 5
-- MongoDB with Mongoose
-- JWT (`jsonwebtoken`) for authentication
-- bcrypt for password hashing
-- multer for file uploads
-- Inngest for background jobs and scheduled tasks
-- Nodemailer for sending emails
-- cors, dotenv
+---
 
-## Progress
+## What you can do
 
-### Frontend (client side)
-- [x] Create React (Vite) app
-- [x] Add dependencies (react-router-dom, lucide-react, react-hot-toast)
-- [x] Set up pages and React Router routes
-- [x] Add landing page and Admin/Employee login portals
-- [x] Add sidebar navigation
-- [x] Add dashboard with separate Admin and Employee views
-- [x] Implement the pages (Employees, Attendance, Leave, Payslips, Settings) and filter input functionality
+**As an admin**
 
-### Backend (server side)
-- [x] Initialize Node.js server with Express
-- [x] Add dependencies (express, cors, dotenv, multer, jsonwebtoken, bcrypt, mongoose)
-- [x] Configure dev tooling (nodemon)
-- [x] Connect to MongoDB with Mongoose
-- [x] Define User model (email, hashed password, role: ADMIN / EMPLOYEE)
-- [x] Define Employee model (profile info, position, department, salary, allowances, deductions, status)
-- [x] Build authentication: JWT login, session lookup, and change-password endpoints
-- [x] Add JWT auth middleware to protect private routes
-- [x] Build Employee CRUD API (list with department filter, create, update, delete)
-- [x] Standardize all API responses to a consistent JSON format (`{ success, data, message }`)
-- [x] Define Attendance and Leave models with their controllers and routes
-- [x] Create Payslip model and its controllers
-- [ ] Set up Inngest and register the functions (auto check-out, leave reminder, attendance cron)
-- [ ] Configure Nodemailer and send the reminder emails
-- [ ] Trigger the Inngest events from the check-in and leave controllers
+- See a dashboard with the company at a glance
+- Add employees (this also creates their login)
+- Approve or reject leave requests
+- Create monthly payslips (salary, allowances and deductions are pre-filled from the employee's record)
+- Change your own password
 
-## Project Structure
+**As an employee**
+
+- Check in when you arrive and check out when you leave. Arriving after 9:30 counts as late, and the day type (full day, half day, etc.) is worked out from your hours
+- Apply for sick, casual or annual leave and follow its status
+- View and print your payslips
+- Edit your bio and change your password
+
+---
+
+## Project layout
 
 ```
-// To be added once the project layout is final
+.
+├── client/          React app (Vite + Tailwind)
+│   └── src/         <- all the front-end code lives here
+└── server/          Express API
+    ├── controlers/  request handlers
+    ├── models/      MongoDB (Mongoose) models
+    ├── routes/      API routes
+    ├── middleware/  login / admin checks
+    ├── inngest/     background jobs (reminder emails)
+    └── seed.js      creates the first admin account
 ```
 
-## Getting Started
+> **Heads up:** Vite only reads `client/src/`. If you edit a file anywhere else in `client/`, nothing will change in the app.
 
-### Prerequisites
+---
 
-- Node.js (v18+ recommended, v20.6+ if you use `node --env-file`)
-- A MongoDB database (local or MongoDB Atlas)
-- An email account for sending emails (a Gmail account with an app password works for development)
-- Git
+## Getting started
 
-### Installation
+### What you need
 
-**1. Clone the repository**
+- Node.js 22
+- A MongoDB database (a free [MongoDB Atlas](https://www.mongodb.com/atlas) cluster works great)
 
-```bash
-git clone https://github.com/<your-username>/Full-Stack-Employee-Management-System.git
-cd Full-Stack-Employee-Management-System
-```
-
-**2. Set up the backend**
+### 1. Set up the server
 
 ```bash
 cd server
 npm install
 ```
 
-Create a `.env` file inside `server/`:
+Create a file called `.env` inside `server/`:
 
 ```env
 PORT=4000
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET_KEY=your_jwt_secret
+MONGODB_URI=your-mongodb-connection-string
+JWT_SECRET_KEY=any-long-random-string
 
-# Email (Nodemailer)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your.address@gmail.com
-SMTP_PASS=your_gmail_app_password
-SMTP_FROM="Employee System <your.address@gmail.com>"
-ADMIN_EMAIL=admin@example.com
+# The first admin account (used by the seed script)
+ADMIN_EMAIL=admin@yourcompany.com
+ADMIN_PASSWORD=pick-a-strong-password
+
+# Only needed for reminder emails (optional)
+SMTP_HOST=
+SMTP_USER=
+SMTP_PASS=
+SMTP_FROM=
+INNGEST_EVENT_KEY=
+INNGEST_SIGNING_KEY=
 ```
 
-> **Gmail users:** enable 2-step verification on your Google account, then create an **app password** and use it as `SMTP_PASS`. Do not use your regular password. `SMTP_FROM` should use the same address as `SMTP_USER`.
-
-> Never commit your `.env` file. Make sure it is listed in `.gitignore`.
-
-Run the server:
+Then create the admin account (you only need to do this once):
 
 ```bash
-npm run server   # runs with nodemon (dev)
-# or
-npm start        # runs with node
+npm run seed
 ```
 
-**3. Run the Inngest dev server (background jobs)**
+If the admin already exists, running it again simply resets their password to whatever is in `ADMIN_PASSWORD`. That makes it handy if you ever get locked out.
 
-In a separate terminal, start the local Inngest dev server and point it at your Express app:
+Start the server:
 
 ```bash
-npx inngest-cli@latest dev -u http://localhost:4000/api/inngest
+npm run server
 ```
 
-The dashboard is available at <http://localhost:8288>, where you can see events, trigger functions manually and inspect runs.
+You should see `Database connected` and `Server running on http://localhost:4000/`. Leave this terminal open.
 
-For production, create an app in Inngest Cloud and add `INNGEST_EVENT_KEY` and `INNGEST_SIGNING_KEY` to your environment.
+### 2. Set up the client
 
-**4. Set up the frontend**
+In a second terminal:
 
 ```bash
-cd ../client
+cd client
 npm install
 npm run dev
 ```
 
-## Background Jobs (Inngest)
+Open the address Vite prints (usually http://localhost:5173).
 
-Functions live in the server's Inngest folder and are served at `/api/inngest`.
+If your API isn't on `http://localhost:4000`, create `client/.env` with:
 
-| Function | Trigger | What it does |
-|----------|---------|--------------|
-| `auto-check-out` | Event `employee/check-in` | Waits 9 hours. If the employee hasn't checked out, sends a reminder email, waits 1 more hour, then marks the attendance as `LATE` |
-| `leave-application-reminder` | Event `leave/pending` | Waits 24 hours. If the leave is still `PENDING`, emails the admin |
-| `attendance-reminder` | Cron (weekdays) | Emails employees who haven't checked in and aren't on approved leave |
-
-Events are sent from the controllers, for example after a check-in:
-
-```javascript
-await inngest.send({
-  name: "employee/check-in",
-  data: { employeeId, attendanceId },
-});
+```env
+VITE_BACKEND_BASE_URL=http://your-api-address
 ```
 
-## API Reference
+### 3. Log in
 
-Protected routes require an `Authorization: Bearer <token>` header, using the JWT returned by `/login`.
+1. On the login page, pick **Admin Portal** and sign in with `ADMIN_EMAIL` and `ADMIN_PASSWORD`.
+2. Go to **Employees → Add Employee** and create someone.
+3. Log out, then sign in on the **Employee Portal** with that person's email and password to see the employee side.
 
-### Auth: `/api/auth`
+---
 
-| Method | Endpoint | Description | Protected |
-|--------|----------|-------------|-----------|
-| POST | `/login` | Log in as Admin or Employee | No |
-| GET | `/session` | Get the currently authenticated user | Yes |
-| POST | `/change-password` | Change the logged-in user's password | Yes |
+## Troubleshooting
 
-### Employees: `/api/employees`
+| What you see | What's usually going on |
+|---|---|
+| **Network Error** on login | The server isn't running, or it can't reach MongoDB. Check the server terminal. |
+| **Invalid credentials** | The admin doesn't exist yet or the password differs. Run `npm run seed` and use the password from `.env`, without the quotes. |
+| **Not authorized as Admin / Employee** | You picked the wrong portal for that account. |
+| The server prints *Cannot reach MongoDB* | Check `MONGODB_URI`, your internet connection, and that your IP is allowed under Network Access in Atlas. |
+| Attendance, leave or profile show errors for the admin | Expected. Those features belong to employees, and the admin account has no employee profile. |
+| You get sent back to the login page | Your session expired (tokens last one day). Just log in again. |
 
-| Method | Endpoint | Description | Protected |
-|--------|----------|-------------|-----------|
-| GET | `/` | List employees (optional `?department=`) | Yes |
-| POST | `/` | Create a new employee | Yes |
-| PUT | `/:id` | Update an employee | Yes |
-| DELETE | `/:id` | Delete an employee | Yes |
+---
 
-### Attendance: `/api/attendance`
+## API at a glance
 
-> Update this table to match your actual routes.
+All routes start with `/api` and (except login) need a login token.
 
-| Method | Endpoint | Description | Protected |
-|--------|----------|-------------|-----------|
-| GET | `/` | Get attendance records | Yes |
-| POST | `/` | Check in / check out | Yes |
+| Area | Routes |
+|---|---|
+| Auth | `POST /auth/login`, `POST /auth/change-password`, `GET /auth/session` |
+| Employees (admin) | `GET /employees`, `POST /employees`, `PUT /employees/:id`, `DELETE /employees/:id` |
+| Profile | `GET /profile`, `POST /profile` (bio only) |
+| Attendance | `POST /attendances` (check in, then check out), `GET /attendances` |
+| Leave | `POST /leave`, `GET /leave`, `GET /leave/all` (admin), `PATCH /leave/:id/status` (admin) |
+| Payslips | `POST /payslips` (admin), `GET /payslips`, `GET /payslips/:id` |
+| Dashboard | `GET /dashboard` (admin) |
 
-### Leave: `/api/leave`
+---
 
-> Update this table to match your actual routes.
+## Deploying
 
-| Method | Endpoint | Description | Protected |
-|--------|----------|-------------|-----------|
-| GET | `/` | List leave applications | Yes |
-| POST | `/` | Create a leave application | Yes |
-| PATCH | `/:id` | Approve or reject a leave application (admin) | Yes |
+Both parts include Vercel-friendly setup (the client has a `vercel.json` so page refreshes work). Set the same environment variables in your hosting dashboard, and point `VITE_BACKEND_BASE_URL` at your deployed API.
 
-### Payslips: `/api/payslips`
+---
 
-> Update this table to match your actual routes.
+## A word on secrets
 
-| Method | Endpoint | Description | Protected |
-|--------|----------|-------------|-----------|
-| GET | `/` | List payslips | Yes |
-| POST | `/` | Generate a payslip (admin) | Yes |
-
-### Response format
-
-All responses follow the same shape:
-
-```jsonc
-// Success
-{ "success": true, "data": { }, "message": "optional" }
-
-// Error
-{ "success": false, "message": "..." }
-```
-
-## License
-
-This project is licensed under the ISC License.
+Never commit `server/.env`. It holds your database password and signing keys. If it has ever been pushed or shared, change those values.
