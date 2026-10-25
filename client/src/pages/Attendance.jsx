@@ -9,6 +9,11 @@ const Attendance = () => {
 
   const [attendances, setAttendances] = useState([])
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const isAdmin = localStorage.getItem('role') === 'ADMIN'
+
+  // today's record decides what the button does: Check In -> Check Out -> done
+  const today = attendances.find((a) => new Date(a.date).toDateString() === new Date().toDateString())
 
   const worked = attendances.filter((a) => a.workingHours != null)
   const cardItems = [
@@ -34,6 +39,18 @@ const Attendance = () => {
     fetchAttendance()
   }, [fetchAttendance])
 
+  const handleClock = async () => {
+    setSaving(true)
+    try {
+      const { data } = await api.post('/attendances')
+      toast.success(data.type === 'CHECK_IN' ? 'Checked in' : 'Checked out')
+      await fetchAttendance()
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Something went wrong')
+    }
+    setSaving(false)
+  }
+
   return (
     <div className='mx-5 my-7'>
       {/** Page Header */}
@@ -42,6 +59,17 @@ const Attendance = () => {
           <h1 className='text-2xl font-medium'>Attendance</h1>
           <p className='text-base font-normal text-[#62748E]'>Track your attendance record</p>
         </div>
+        {!isAdmin && (
+          <button
+            type="button"
+            onClick={handleClock}
+            disabled={saving || (today && today.checkOut)}
+            className='flex items-center gap-2 px-4 h-10 rounded-md bg-[#4F39F6] text-white cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed'
+          >
+            <TimerIcon size={16} />
+            <span>{!today ? 'Check In' : !today.checkOut ? 'Check Out' : 'Done for today'}</span>
+          </button>
+        )}
       </div>
 
       {/** Cards */}

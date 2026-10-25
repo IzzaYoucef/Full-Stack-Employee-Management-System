@@ -25,6 +25,33 @@ const Leave = () => {
 
   const [leaves, setLeaves] = useState([])
   const [loading, setLoading] = useState(true)
+  const emptyForm = { type: 'SICK', startDate: '', endDate: '', reason: '' }
+  const [showForm, setShowForm] = useState(false)
+  const [form, setForm] = useState(emptyForm)
+  const [saving, setSaving] = useState(false)
+  const todayStr = new Date().toLocaleDateString('en-CA') // YYYY-MM-DD in local time
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
+
+  const handleApply = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    try {
+      // send local midnight so "today" is accepted whatever the timezone
+      await api.post('/leave', {
+        ...form,
+        startDate: new Date(form.startDate + 'T00:00:00').toISOString(),
+        endDate: new Date(form.endDate + 'T00:00:00').toISOString(),
+      })
+      toast.success('Leave request sent')
+      setShowForm(false)
+      setForm(emptyForm)
+      fetchEmployeeLeave()
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Something went wrong')
+    }
+    setSaving(false)
+  }
 
   const cardItems = [
     { title: "Sick Leave", icon: ThermometerIcon, number: leaves.filter(l => l.type === "SICK").length },
@@ -68,13 +95,16 @@ const Leave = () => {
           <h1 className='text-2xl font-medium'>Leave Management</h1>
           <p className='text-base font-normal text-[#62748E]'>Your leave history and requests</p>
         </div>
-        <button
-          type="button"
-          className='flex items-center gap-2 px-4 py-2 rounded-md  text-white cursor-pointer bg-[#4F39F6]'
-        >
-          <PlusIcon size={16} />
-          <span>Apply Leave</span>
-        </button>
+        {!isAdmin && (
+          <button
+            type="button"
+            onClick={() => setShowForm(true)}
+            className='flex items-center gap-2 px-4 py-2 rounded-md  text-white cursor-pointer bg-[#4F39F6]'
+          >
+            <PlusIcon size={16} />
+            <span>Apply Leave</span>
+          </button>
+        )}
       </div>
 
       {/** Cards */}
@@ -149,6 +179,35 @@ const Leave = () => {
           ))
         )}
       </div>
+
+      {/** Apply Leave form */}
+      {showForm && (
+        <div className='fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50'>
+          <form onSubmit={handleApply} className='bg-white rounded-lg p-6 w-full max-w-md grid gap-3'>
+            <h2 className='text-lg font-medium'>Apply for Leave</h2>
+            <select name='type' value={form.type} onChange={handleChange} className='border border-gray-300 rounded-md px-3 py-2'>
+              <option value='SICK'>Sick Leave</option>
+              <option value='CASUAL'>Casual Leave</option>
+              <option value='ANNUAL'>Annual Leave</option>
+            </select>
+            <div className='grid grid-cols-2 gap-3'>
+              <div className='grid gap-1'>
+                <label className='text-sm text-gray-500'>From</label>
+                <input name='startDate' type='date' min={todayStr} value={form.startDate} onChange={handleChange} required className='border border-gray-300 rounded-md px-3 py-2' />
+              </div>
+              <div className='grid gap-1'>
+                <label className='text-sm text-gray-500'>To</label>
+                <input name='endDate' type='date' min={form.startDate || todayStr} value={form.endDate} onChange={handleChange} required className='border border-gray-300 rounded-md px-3 py-2' />
+              </div>
+            </div>
+            <textarea name='reason' value={form.reason} onChange={handleChange} placeholder='Reason' required className='border border-gray-300 rounded-md px-3 py-2' />
+            <div className='flex justify-end gap-2 mt-2'>
+              <button type='button' onClick={() => setShowForm(false)} className='px-4 py-2 rounded-md border border-gray-300 cursor-pointer'>Cancel</button>
+              <button type='submit' disabled={saving} className='px-4 py-2 rounded-md bg-[#4F39F6] text-white cursor-pointer disabled:opacity-60'>{saving ? 'Sending...' : 'Send request'}</button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   )
 }

@@ -9,6 +9,7 @@ const Settings = () => {
   const [loading, setLoading] = useState(true);
   const [employeeData, setEmployeeData] = useState({});
   const [showPasswordPage, setShowPasswordPage] = useState(false);
+  const [hasProfile, setHasProfile] = useState(true); // the admin account has no employee profile
 
   const handleChanges = (e) => {
     e.preventDefault();
@@ -29,6 +30,7 @@ const Settings = () => {
       setEmployeeData(data.data);
     } catch (err) {
       // the admin account has no employee profile
+      setHasProfile(false);
       setEmployeeData({ email: localStorage.getItem('email') });
     }
     setLoading(false);
@@ -53,11 +55,11 @@ const Settings = () => {
           <form onSubmit={handleChanges} className='p-6 flex flex-col gap-5 items-start border border-gray-400'>
             <div className='flex w-full gap-6'>
               <div className='flex flex-1 min-w-0 gap-2 flex-col'>
-                <label htmlFor="fullName" className='text-sm font-medium'>First Name</label>
+                <label htmlFor="fullName" className='text-sm font-medium'>Name</label>
                 <input
                   id="fullName"
                   type="text"
-                  value={`${employeeData.firstName ?? ''} ${employeeData.lastName ?? ''}`}
+                  value={hasProfile ? `${employeeData.firstName ?? ''} ${employeeData.lastName ?? ''}` : 'Administrator'}
                   disabled
                   className='p-2 bg-[#E2E8F0] text-gray-500 rounded-md w-full'
                 />
@@ -74,14 +76,16 @@ const Settings = () => {
               </div>
             </div>
 
+            {hasProfile ? (
+              <>
             <div className='flex flex-col w-full gap-2'>
               <label htmlFor="position" className='text-sm font-medium'>Position</label>
               <textarea
                 id="position"
                 name="position"
                 value={employeeData.position ?? ''}
-                onChange={handleFieldChange}
-                className='p-2 border border-gray-300 rounded w-full text-gray-700'
+                disabled
+                className='p-2 bg-[#E2E8F0] text-gray-500 rounded w-full'
               />
             </div>
 
@@ -106,6 +110,10 @@ const Settings = () => {
               <Save size={16} />
               <p>Save Changes</p>
             </button>
+              </>
+            ) : (
+              <p className='text-gray-500'>The administrator account has no employee profile. You can still change your password below.</p>
+            )}
 
             <div className='mt-4 border border-gray-400 p-3 rounded flex justify-between  w-full'>
               <div className='flex gap-3'>
