@@ -152,15 +152,3 @@ All routes start with `/api` and (except login) need a login token.
 | Leave | `POST /leave`, `GET /leave`, `GET /leave/all` (admin), `PATCH /leave/:id/status` (admin) |
 | Payslips | `POST /payslips` (admin), `GET /payslips`, `GET /payslips/:id` |
 | Dashboard | `GET /dashboard` (admin) |
-
----
-
-## Deploying
-
-Both parts include Vercel-friendly setup (the client has a `vercel.json` so page refreshes work). Set the same environment variables in your hosting dashboard, and point `VITE_BACKEND_BASE_URL` at your deployed API.
-
----
-
-## A word on secrets
-
-Never commit `server/.env`. It holds your database password and signing keys. If it has ever been pushed or shared, change those values.
