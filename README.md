@@ -152,3 +152,11 @@ All routes start with `/api` and (except login) need a login token.
 | Leave | `POST /leave`, `GET /leave`, `GET /leave/all` (admin), `PATCH /leave/:id/status` (admin) |
 | Payslips | `POST /payslips` (admin), `GET /payslips`, `GET /payslips/:id` |
 | Dashboard | `GET /dashboard` (admin) |
+
+## RUN with docker (without docker compose)  
+```bash
+docker build -t ems-server ./server
+docker build -t ems-client ./client 
+docker run -d --name server -p 4000:4000 --env-file ./server/.env ems-serevr
+docker run -d --name client -p 5731:5731 --env-file ./client/src/.env ems-client
+```
